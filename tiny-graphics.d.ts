@@ -67,9 +67,9 @@ type Constructor<T> = abstract new (...args: any[]) => T;
 
 interface ShapeVertex {
   position: Vector3;
-  // color?: Vector4;
-  // normal?: Vector3;
-  // texture_coord?: Vector<2>;
+  color?: Vector4;
+  normal?: Vector3;
+  texture_coord?: Vector<2>;
   [attribute: string]: number | VectorLike<any> | Matrix<any, any> | undefined;
 }
 
