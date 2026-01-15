@@ -10,6 +10,7 @@ import type { Keyboard_Manager, Controls_Widget } from "./tiny-graphics-gui";
 
 import * as math from "./tiny-graphics-math";
 import * as widgets from "./tiny-graphics-gui";
+import { Material } from "./examples/common";
 
 interface DefaultUniforms {
   camera_inverse: Mat4;
@@ -20,9 +21,9 @@ interface DefaultUniforms {
   animation_delta_time: number;
 }
 
-type Uniforms = DefaultUniforms & {
+interface Uniforms extends DefaultUniforms {
   [key: string]: any;
-};
+}
 
 interface ComponentProps {
   uniforms: Uniforms;
@@ -36,9 +37,11 @@ interface ShapeGPUInstance {
   [key: string]: any;
 }
 
+type GPUAdresses = Record<string, WebGLUniformLocation | null>;
+
 interface ShaderGPUInstance {
   program?: WebGLProgram;
-  gpu_addresses?: Record<string, unknown>;
+  gpu_addresses?: GPUAdresses;
   vertShdr?: WebGLShader;
   fragShdr?: WebGLShader;
   [key: string]: any;
@@ -153,30 +156,30 @@ declare class Shape {
   fill_buffer(
     selection_of_attributes: readonly VertexAttributeName[],
     buffer_hint?: keyof WebGL2RenderingContext,
-    divisor?: number
+    divisor?: number,
   ): void;
   copy_onto_graphics_card(
     context: WebGL2RenderingContext,
-    write_to_indices?: boolean
+    write_to_indices?: boolean,
   ): ShapeGPUInstance;
   execute_shaders(
     gl: WebGL2RenderingContext,
     gpu_instance: ShapeGPUInstance,
     type: keyof WebGL2RenderingContext,
-    instances: GLsizei
+    instances: GLsizei,
   ): void;
   draw(
     webgl_manager: Component,
     uniforms: Uniforms,
     model_transform: Mat4,
-    material: Shader, // TODO: should it really be Shader?
+    material: Material,
     type?: keyof WebGL2RenderingContext,
-    instances?: GLsizei
+    instances?: GLsizei,
   ): void;
   static insert_transformed_copy_into(
     recipient: Shape,
-    args: any[], // TODO: improve when you type common.js
-    points_transform?: Mat4
+    args: any[], // TODO: improve when you type common.js ?
+    points_transform?: Mat4,
   ): void;
   make_flat_shaded_version(): abstract new (...args: any[]) => this;
   duplicate_the_shared_vertices(): void;
@@ -192,27 +195,27 @@ declare class Shader {
     context: WebGL2RenderingContext,
     uniforms: Uniforms,
     model_transform: Mat4,
-    material: Shader
+    material: Material,
   ): void;
   init_UBO(
     gl: WebGL2RenderingContext,
     program: WebGLProgram,
-    ubo_binding: UBOBinding
+    ubo_binding: UBOBinding,
   ): void;
   bind_UBO(
     gl: WebGL2RenderingContext,
     program: WebGLProgram,
     shader_name: string,
-    binding_point: number
+    binding_point: number,
   ): void;
   vertex_glsl_code(): string;
   fragment_glsl_code(): string;
   update_GPU(
     context: WebGL2RenderingContext,
-    gpu_addresses: Record<string, unknown>,
+    gpu_addresses: GPUAdresses,
     uniforms: Uniforms,
     model_transform: Mat4,
-    material: Shader // TODO: should it really be Shader?
+    material: Material,
   ): void;
   static default_values(): Record<string, any>;
   static mapping_UBO(): UBOBinding;
@@ -229,7 +232,7 @@ declare class Texture {
   constructor(filename: string, min_filter?: keyof WebGL2RenderingContext);
   copy_onto_graphics_card(
     context: WebGL2RenderingContext,
-    need_initial_settings?: boolean
+    need_initial_settings?: boolean,
   ): TextureGPUInstance;
   activate(context: WebGL2RenderingContext, texture_unit?: number): void;
 }
@@ -246,16 +249,16 @@ declare class Shadow_Map {
     width: number,
     height: number,
     min_filter?: keyof WebGL2RenderingContext,
-    mag_filter?: keyof WebGL2RenderingContext
+    mag_filter?: keyof WebGL2RenderingContext,
   );
 
   copy_onto_graphics_card(
-    context: WebGL2RenderingContext
+    context: WebGL2RenderingContext,
   ): ShadowMapGPUInstance;
   activate(
     gl: WebGL2RenderingContext,
     texture_unit?: number,
-    treat_as_fbo?: boolean
+    treat_as_fbo?: boolean,
   ): void;
   deactivate(caller: Component, treat_as_fbo?: boolean): void;
 }
@@ -290,19 +293,19 @@ declare class Component {
   static default_uniforms(): DefaultUniforms;
   static initialize_CSS(
     classType: Constructor<any>,
-    rules: readonly string[]
+    rules: readonly string[],
   ): void;
   make_context(
     canvas: HTMLCanvasElement,
     background_color?: Vector4,
-    dimensions?: [number, number]
+    dimensions?: [number, number],
   ): void;
   set_canvas_size(dimensions?: [number, number]): void;
   frame_advance(time?: number): void;
   new_line(parent?: HTMLElement): void;
   live_string(
     callback: (elem: HTMLDivElement) => void,
-    parent?: HTMLElement
+    parent?: HTMLElement,
   ): void;
   key_triggered_button(
     description: string,
@@ -311,7 +314,7 @@ declare class Component {
     color?: string,
     release_event?: (this: Component) => void,
     recipient?: Component,
-    parent?: HTMLElement
+    parent?: HTMLElement,
   ): void;
   render_layout(div: HTMLDivElement, options?: ComponentLayoutOptions): void;
   init(): void;
@@ -332,33 +335,33 @@ declare class UBO {
     gl: WebGL2RenderingContext,
     buffer_name: string,
     buffer_size: number,
-    buffer_layout: UBOBlockLayout[]
+    buffer_layout: UBOBlockLayout[],
   );
   bind(binding_point: number): void;
   update(
     buffer_name: string,
     buffer_data: Float32Array | number[] | number,
-    num_instance?: number
+    num_instance?: number,
   ): this;
   static create(
     gl: WebGL2RenderingContext,
     block_name: string,
-    buffer_layout: UBOBlockLayout[]
+    buffer_layout: UBOBlockLayout[],
   ): void;
   static get_size(type: UBOCacheSizeType): [number, number];
   static calculate(buffer_layout: UBOLayoutItem[]): number;
-
 }
 
-type Tiny = typeof math & typeof widgets & {
-  math: typeof math;
-  widgets: typeof widgets;
-  Shape: typeof Shape;
-  Shader: typeof Shader;
-  Texture: typeof Texture;
-  Shadow_Map: typeof Shadow_Map;
-  Component: typeof Component;
-  UBO: typeof UBO;
-}
+type Tiny = typeof math &
+  typeof widgets & {
+    math: typeof math;
+    widgets: typeof widgets;
+    Shape: typeof Shape;
+    Shader: typeof Shader;
+    Texture: typeof Texture;
+    Shadow_Map: typeof Shadow_Map;
+    Component: typeof Component;
+    UBO: typeof UBO;
+  };
 
 export const tiny: Tiny;

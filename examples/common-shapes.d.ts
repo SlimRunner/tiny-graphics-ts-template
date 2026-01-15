@@ -6,6 +6,7 @@ import type {
   ShapeVertex,
   Uniforms,
 } from "../tiny-graphics.d.ts";
+import { Material } from "./common";
 
 type TextureRange = [[number, number], [number, number]];
 
@@ -146,10 +147,10 @@ declare class Shape_From_File extends Shape {
   load_file(filename: string): Promise<void>;
   parse_into_mesh(data: string): void;
   draw(
-    caller: Component,
+    caller: Component, // renamed from base
     uniforms: Uniforms,
     model_transform: Mat4,
-    material: Shader,
+    material: Material,
     type?: keyof WebGL2RenderingContext,
     instances?: GLsizei
   ): void;
