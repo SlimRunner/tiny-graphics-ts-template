@@ -46,7 +46,7 @@ declare class Grid_Patch extends Shape {
     columns: number,
     next_row_function: (t: number, prev_point: number) => number,
     next_column_function: (u: number, prev_point: number, v: number) => number,
-    texture_coord_range: TextureRange
+    texture_coord_range: TextureRange,
   );
   static sample_array(array: Vector3[], ratio: number): Vector3;
 }
@@ -57,7 +57,7 @@ declare class Surface_Of_Revolution extends Grid_Patch {
     columns: number,
     points: Vector3[],
     texture_coord_range: TextureRange,
-    total_curvature_angle?: number
+    total_curvature_angle?: number,
   );
   static sample_array(array: any[], ratio: number): any;
 }
@@ -152,11 +152,11 @@ declare class Shape_From_File extends Shape {
     model_transform: Mat4,
     material: Material,
     type?: keyof WebGL2RenderingContext,
-    instances?: GLsizei
+    instances?: GLsizei,
   ): void;
 }
 
-export const def: {
+type ShapeDefs = {
   Triangle: typeof Triangle;
   Square: typeof Square;
   Tetrahedron: typeof Tetrahedron;
@@ -183,3 +183,5 @@ export const def: {
   Minimaler_Shape: typeof Minimaler_Shape;
   Shape_From_File: typeof Shape_From_File;
 };
+
+export const def: ShapeDefs;

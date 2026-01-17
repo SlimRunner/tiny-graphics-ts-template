@@ -39,6 +39,8 @@ declare class Movement_Controls extends Component {
   render_animation(caller: Component): void;
 }
 
-export const def: {
+type ComponentDefs = {
   Movement_Controls: typeof Movement_Controls;
 };
+
+export const def: ComponentDefs;

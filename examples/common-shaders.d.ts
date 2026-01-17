@@ -102,7 +102,7 @@ declare class Textured_Phong extends Phong_Shader {
 
 declare class Fake_Bump_Map extends Textured_Phong {}
 
-export const def: {
+type ShaderDefs = {
   Basicer_Shader: typeof Basicer_Shader;
   Basic_Shader: typeof Basic_Shader;
   Instanced_Shader: typeof Instanced_Shader;
@@ -113,4 +113,6 @@ export const def: {
   Phong_Shader: typeof Phong_Shader;
   Textured_Phong: typeof Textured_Phong;
   Fake_Bump_Map: typeof Fake_Bump_Map;
-};
+}
+
+export const def: ShaderDefs;
