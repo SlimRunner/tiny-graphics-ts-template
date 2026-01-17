@@ -138,6 +138,8 @@ interface UBOItems {
   chunk_length: number;
 }
 
+type UBOBuffer = Float32Array | number[] | number;
+
 // ==============================================================
 
 declare class Shape {
@@ -273,6 +275,8 @@ declare class Component {
   context: WebGL2RenderingContext;
   prev_time: number;
   event: number; // return from requestAnimationFrame
+  width?: number;
+  height?: number;
 
   control_panel: HTMLDivElement;
   div: HTMLDivElement;
@@ -341,7 +345,7 @@ declare class UBO {
   bind(binding_point: number): void;
   update(
     buffer_name: string,
-    buffer_data: Float32Array | number[] | number,
+    buffer_data: UBOBuffer,
     num_instance?: number,
   ): this;
   static create(
