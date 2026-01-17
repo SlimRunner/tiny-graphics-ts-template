@@ -37,11 +37,11 @@ interface ShapeGPUInstance {
   [key: string]: any;
 }
 
-type GPUAdresses = Record<string, WebGLUniformLocation | null>;
+type GPUAddresses = Record<string, WebGLUniformLocation | null>;
 
 interface ShaderGPUInstance {
   program?: WebGLProgram;
-  gpu_addresses?: GPUAdresses;
+  gpu_addresses?: GPUAddresses;
   vertShdr?: WebGLShader;
   fragShdr?: WebGLShader;
   [key: string]: any;
@@ -212,7 +212,7 @@ declare class Shader {
   fragment_glsl_code(): string;
   update_GPU(
     context: WebGL2RenderingContext,
-    gpu_addresses: GPUAdresses,
+    gpu_addresses: GPUAddresses,
     uniforms: Uniforms,
     model_transform: Mat4,
     material: Material,

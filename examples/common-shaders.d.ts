@@ -1,5 +1,5 @@
 import {
-  GPUAdresses,
+  GPUAddresses,
   Shader,
   Texture,
   UBOBinding,
@@ -37,7 +37,7 @@ declare class Instanced_Shader extends Shader {
 
   update_GPU(
     context: WebGL2RenderingContext,
-    gpu_addresses: GPUAdresses,
+    gpu_addresses: GPUAddresses,
     uniforms: // NOTE: is this too much?
       | Uniforms
       | {
@@ -79,12 +79,12 @@ declare class Phong_Shader extends Shader {
   ): LightSource;
   send_material(
     gl: WebGL2RenderingContext,
-    gpu: GPUAdresses,
+    gpu: GPUAddresses,
     material: Material | FlatPhongMaterial,
   ): void;
   send_uniforms(
     gl: WebGL2RenderingContext,
-    gpu: GPUAdresses,
+    gpu: GPUAddresses,
     uniforms: Uniforms,
     model_transform: Mat4,
   ): void;
@@ -93,7 +93,7 @@ declare class Phong_Shader extends Shader {
 declare class Textured_Phong extends Phong_Shader {
   update_GPU(
     context: WebGL2RenderingContext,
-    gpu_addresses: GPUAdresses,
+    gpu_addresses: GPUAddresses,
     uniforms: Uniforms,
     model_transform: Mat4,
     material: Material | FlatPhongMaterial,
