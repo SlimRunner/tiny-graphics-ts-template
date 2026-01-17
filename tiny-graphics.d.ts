@@ -265,6 +265,7 @@ declare class Shadow_Map {
 
 declare class Component {
   props: ComponentProps;
+  uniforms: Uniforms;
   animated_children: Component[]; // TODO: verify this is correct?
   document_children: Component[]; // TODO: verify this is correct?
   key_controls: Keyboard_Manager;
@@ -319,8 +320,8 @@ declare class Component {
   render_layout(div: HTMLDivElement, options?: ComponentLayoutOptions): void;
   init(): void;
   render_animation(context: Component): void;
-  render_explanation(): void;
-  render_controls(): void;
+  render_explanation(...args: any[]): void;
+  render_controls(...args: any[]): void;
 }
 
 declare class UBO {
