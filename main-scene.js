@@ -35,9 +35,6 @@ import {Text_Demo}
                     from "./examples/text-demo.js";
 import {Transforms_Sandbox_Base, Transforms_Sandbox}
                     from "./examples/transforms-sandbox.js";
-
-import {My_Demo}
-                    from "./my_code/my_scene.js"
 import {Demo}
                     from "./my_code/main.js"
 
@@ -56,7 +53,6 @@ Object.assign (defs,
                {Shadows_Demo},
                {Text_Demo},
                {Transforms_Sandbox_Base, Transforms_Sandbox},
-               {My_Demo},
                {Demo},
 );
 
