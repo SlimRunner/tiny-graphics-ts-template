@@ -137,10 +137,15 @@ export namespace defs {
     dirty: boolean;
     shape: tiny.Shape;
     global_transform: math.Mat4;
-    transforms: math.Mat4[];
+    transforms: math.Mat4[] | math.Mat4;
     material: Material;
 
-    constructor(shape: tiny.Shape, transforms: math.Mat4[], material: Material);
+    constructor(shape: tiny.Shape, transforms: math.Mat4[] | math.Mat4, material: Material);
+
+    set_shape(shape: tiny.Shape): void;
+    set_transforms(transforms: math.Mat4[] | math.Mat4): void;
+    apply_transform(model_transform: math.Mat4): void;
+    set_material(material: Material): void;
   }
 
   export class Renderer {
