@@ -1,6 +1,6 @@
 import { tiny } from "../tiny-graphics.js";
 import { defs } from "../examples/common.js";
-import { math } from "tiny-graphics-math.js";
+import { math } from "../tiny-graphics-math.js";
 
 export class Demo extends tiny.Component {
   render_controls(): void {
