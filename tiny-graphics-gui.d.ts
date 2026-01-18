@@ -98,10 +98,12 @@ declare class Editor_Widget {
   submit_demo(): Promise<void>;
 }
 
-export const widgets: {
+type Widgets = {
   Controls_Widget: typeof Controls_Widget;
   Keyboard_Manager: typeof Keyboard_Manager;
   Code_Manager: typeof Code_Manager;
   Code_Widget: typeof Code_Widget;
   Editor_Widget: typeof Editor_Widget;
 };
+
+export declare const widgets: Widgets;

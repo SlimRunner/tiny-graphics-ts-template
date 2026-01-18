@@ -43,4 +43,4 @@ type ComponentDefs = {
   Movement_Controls: typeof Movement_Controls;
 };
 
-export const def: ComponentDefs;
+export declare const defs: ComponentDefs;

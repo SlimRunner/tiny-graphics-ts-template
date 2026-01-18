@@ -184,4 +184,4 @@ type ShapeDefs = {
   Shape_From_File: typeof Shape_From_File;
 };
 
-export const def: ShapeDefs;
+export declare const defs: ShapeDefs;

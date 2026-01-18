@@ -182,7 +182,7 @@ declare class Mat4 extends Matrix<4, 4> {
   static inverse(m: MatrixLike<4, 4>): Mat4;
 }
 
-export const math: {
+type MathTiny = {
   Vector: typeof Vector;
   Vector3: typeof Vector3;
   Vector4: typeof Vector4;
@@ -197,3 +197,5 @@ export const math: {
   unsafe4: typeof Vector4.unsafe;
   color: typeof Vector4.create;
 };
+
+export declare const math: MathTiny;

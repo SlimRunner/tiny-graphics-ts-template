@@ -115,4 +115,4 @@ type ShaderDefs = {
   Fake_Bump_Map: typeof Fake_Bump_Map;
 }
 
-export const def: ShaderDefs;
+export declare const defs: ShaderDefs;

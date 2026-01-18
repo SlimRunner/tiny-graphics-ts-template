@@ -1,15 +1,14 @@
 import type {
   Mat4,
+  MathTiny,
   Matrix,
   Vector,
   Vector3,
   Vector4,
   VectorLike,
 } from "./tiny-graphics-math";
-import type { Keyboard_Manager, Controls_Widget } from "./tiny-graphics-gui";
+import type { Keyboard_Manager, Controls_Widget, Widgets } from "./tiny-graphics-gui";
 
-import * as math from "./tiny-graphics-math";
-import * as widgets from "./tiny-graphics-gui";
 import { Material } from "./examples/common";
 
 interface DefaultUniforms {
@@ -357,10 +356,10 @@ declare class UBO {
   static calculate(buffer_layout: UBOLayoutItem[]): number;
 }
 
-type Tiny = typeof math &
-  typeof widgets & {
-    math: typeof math;
-    widgets: typeof widgets;
+type Tiny = MathTiny &
+  Widgets & {
+    math: typeof MathTiny;
+    widgets: typeof Widgets;
     Shape: typeof Shape;
     Shader: typeof Shader;
     Texture: typeof Texture;
@@ -369,4 +368,4 @@ type Tiny = typeof math &
     UBO: typeof UBO;
   };
 
-export const tiny: Tiny;
+export declare const tiny: Tiny;
