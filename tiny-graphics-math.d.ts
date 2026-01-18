@@ -124,20 +124,17 @@ declare class Matrix<R extends number, C extends number>
   minus(b: MatrixLike<R, C>): Matrix<R, C>;
   transposed(): Matrix<C, R>;
   times(b: number, pre_alloc?: MatrixLike<R, C>): Matrix<R, C>;
-  times(b: MatrixLike<C, R>, pre_alloc?: MatrixLike<R, R>): Matrix<R, R>;
-  times<R2 extends number, C2 extends number>(
-    b: MatrixLike<R2, C2>,
-    pre_alloc?: MatrixLike<R, C2>
+  times<C2 extends number>( // R x C  *  C x C2  =  R x C2
+    b: MatrixLike<C, C2>,
+    pre_alloc?: MatrixLike<R, C2>,
   ): Matrix<R, C2>;
   pre_multiply(b: number): Matrix<R, C>;
-  pre_multiply(b: MatrixLike<C, R>): Matrix<C, C>;
-  pre_multiply<R2 extends number, C2 extends number>(
-    b: MatrixLike<R2, C2>
+  pre_multiply<R2 extends number>( // R2 x R  *  R x C  =  R2 x C
+    b: MatrixLike<R2, R>,
   ): Matrix<R2, C>;
   post_multiply(b: number): Matrix<R, C>;
-  post_multiply(b: MatrixLike<C, R>): Matrix<R, R>;
-  post_multiply<R2 extends number, C2 extends number>(
-    b: MatrixLike<R2, C2>
+  post_multiply<C2 extends number>( // R x C  *  C x C2  =  R x C2
+    b: MatrixLike<C, C2>,
   ): Matrix<R, C2>;
   static flatten_2D_to_1D<
     R2 extends number,
