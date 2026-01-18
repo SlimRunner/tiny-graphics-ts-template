@@ -6,7 +6,7 @@ import {
   Uniforms,
 } from "../tiny-graphics";
 import { math } from "../tiny-graphics-math";
-import { Material } from "./common";
+import { defs } from "./common";
 
 interface LightSource {
   position: math.Vector4;
@@ -45,7 +45,7 @@ export namespace defs {
             lights?: LightSource[];
           },
       model_transform: math.Mat4,
-      material: Material,
+      material: defs.Material,
     ): void;
 
     static default_values(): {
@@ -80,7 +80,7 @@ export namespace defs {
     send_material(
       gl: WebGL2RenderingContext,
       gpu: GPUAddresses,
-      material: Material | FlatPhongMaterial,
+      material: defs.Material | FlatPhongMaterial,
     ): void;
     send_uniforms(
       gl: WebGL2RenderingContext,
@@ -96,7 +96,7 @@ export namespace defs {
       gpu_addresses: GPUAddresses,
       uniforms: Uniforms,
       model_transform: math.Mat4,
-      material: Material | FlatPhongMaterial,
+      material: defs.Material | FlatPhongMaterial,
     ): void;
   }
 

@@ -1,6 +1,6 @@
 import { math } from "../tiny-graphics-math";
 import type { ShapeVertex, tiny, Uniforms } from "../tiny-graphics";
-import { Material } from "./common";
+import { defs } from "./common";
 
 type TextureRange = [[number, number], [number, number]];
 
@@ -149,7 +149,7 @@ export namespace defs {
       caller: tiny.Component, // renamed from base
       uniforms: Uniforms,
       model_transform: math.Mat4,
-      material: Material,
+      material: defs.Material,
       type?: keyof WebGL2RenderingContext,
       instances?: GLsizei,
     ): void;
