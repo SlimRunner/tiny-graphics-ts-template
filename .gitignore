@@ -459,3 +459,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/python,node,visualstudiocode,macos,windows,emacs,vim
+
+# ignore JS output code
+my_code
