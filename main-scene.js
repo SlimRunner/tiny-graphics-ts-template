@@ -38,6 +38,8 @@ import {Transforms_Sandbox_Base, Transforms_Sandbox}
 
 import {My_Demo}
                     from "./my_code/my_scene.js"
+import {Demo}
+                    from "./my_code/main.js"
 
 Object.assign (defs,
                {Minimal_Webgl_Demo},
@@ -54,12 +56,13 @@ Object.assign (defs,
                {Shadows_Demo},
                {Text_Demo},
                {Transforms_Sandbox_Base, Transforms_Sandbox},
-               {My_Demo}
+               {My_Demo},
+               {Demo},
 );
 
 // ******************** SELECT THE DEMO TO DISPLAY:
 
-const main_scene        = Fish_Demo;
+const main_scene        = Demo;
 const additional_scenes = [];
 
 export {main_scene, additional_scenes, defs};
