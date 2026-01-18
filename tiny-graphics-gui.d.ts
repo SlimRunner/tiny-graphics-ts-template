@@ -1,109 +1,101 @@
-import type { Component } from "./tiny-graphics";
+import type { tiny } from "./tiny-graphics";
 
-interface TinyDefs {
+export interface TinyDefs {
   [key: string]: any;
 }
 
-interface WidgetOptions {
-  code_in_focus?: Component;
+export interface WidgetOptions {
+  code_in_focus?: tiny.Component;
   hide_navigator?: boolean;
   rows?: number;
   [key: string]: any;
 }
 
-interface SavedControls {
+export interface SavedControls {
   shortcut_combination: Array<KeyboardEvent["key"]>;
   callback: (event: KeyboardEvent) => void;
   keyup_callback: (event: KeyboardEvent) => void;
 }
 
-declare class Controls_Widget {
-  row: HTMLTableRowElement;
-  panels: Array<HTMLTableCellElement>;
-  component: Component;
-  timestamp: number;
-  event: number;
+export namespace widgets {
+  export class Controls_Widget {
+    row: HTMLTableRowElement;
+    panels: Array<HTMLTableCellElement>;
+    component: tiny.Component;
+    timestamp: number;
+    event: number;
 
-  constructor(component: Component, options?: WidgetOptions);
+    constructor(component: tiny.Component, options?: WidgetOptions);
 
-  make_panels(time: number): void;
-  render(time?: number): void;
-}
+    make_panels(time: number): void;
+    render(time?: number): void;
+  }
 
-declare class Keyboard_Manager {
-  saved_controls: SavedControls;
-  actively_pressed_keys: Set<KeyboardEvent>;
-  callback_behavior: (event: KeyboardEvent) => void;
+  export class Keyboard_Manager {
+    saved_controls: SavedControls;
+    actively_pressed_keys: Set<KeyboardEvent>;
+    callback_behavior: (event: KeyboardEvent) => void;
 
-  constructor(
-    target: EventTarget,
-    callback_behavior: (
+    constructor(
+      target: EventTarget,
+      callback_behavior: (
+        callback: (event: KeyboardEvent) => void,
+        event: KeyboardEvent,
+      ) => void,
+    );
+
+    key_down_handler(event: KeyboardEvent): void;
+    key_up_handler(event: KeyboardEvent): void;
+    add(
+      shortcut_combination: Array<KeyboardEvent["key"]>,
       callback: (event: KeyboardEvent) => void,
-      event: KeyboardEvent
-    ) => void
-  );
+      keyup_callback: (event: KeyboardEvent) => void,
+    ): void;
+  }
 
-  key_down_handler(event: KeyboardEvent): void;
-  key_up_handler(event: KeyboardEvent): void;
-  add(
-    shortcut_combination: Array<KeyboardEvent["key"]>,
-    callback: (event: KeyboardEvent) => void,
-    keyup_callback: (event: KeyboardEvent) => void
-  ): void;
+  export class Code_Manager {
+    tokens: {
+      type: string;
+      value: string;
+    }[];
+    no_comments: string[];
+
+    constructor(code: string);
+  }
+
+  export class Code_Widget {
+    component: tiny.Component;
+    definitions: TinyDefs;
+    code_display: HTMLDivElement;
+
+    constructor(component: tiny.Component, options?: WidgetOptions);
+
+    build_reader(
+      element: HTMLElement,
+      main_scene: tiny.Component,
+      definitions: TinyDefs,
+    ): void;
+    build_navigator(element: HTMLElement, main_scene: tiny.Component): void;
+    display_code(code_in_focus: tiny.Component): void;
+    format_code(code_string: string): void;
+  }
+
+  export class Editor_Widget {
+    component: tiny.Component;
+    options: WidgetOptions;
+    form: HTMLFormElement;
+    run_button: HTMLButtonElement;
+    submit: HTMLButtonElement;
+    author_box: HTMLInputElement;
+    password_box: HTMLInputElement;
+    overwrite_panel: HTMLSpanElement;
+    submit_result: HTMLDivElement;
+    new_demo_code: HTMLTextAreaElement;
+
+    constructor(component: tiny.Component, options?: WidgetOptions);
+
+    select_class(class_definition: tiny.Component): void;
+    fetch_handler(url: RequestInfo | URL, body: BodyInit): void;
+    submit_demo(): Promise<void>;
+  }
 }
-
-declare class Code_Manager {
-  tokens: {
-    type: string;
-    value: string;
-  }[];
-  no_comments: string[];
-
-  constructor(code: string);
-}
-
-declare class Code_Widget {
-  component: Component;
-  definitions: TinyDefs;
-  code_display: HTMLDivElement;
-
-  constructor(component: Component, options?: WidgetOptions);
-
-  build_reader(
-    element: HTMLElement,
-    main_scene: Component,
-    definitions: TinyDefs
-  ): void;
-  build_navigator(element: HTMLElement, main_scene: Component): void;
-  display_code(code_in_focus: Component): void;
-  format_code(code_string: string): void;
-}
-
-declare class Editor_Widget {
-  component: Component;
-  options: WidgetOptions;
-  form: HTMLFormElement;
-  run_button: HTMLButtonElement;
-  submit: HTMLButtonElement;
-  author_box: HTMLInputElement;
-  password_box: HTMLInputElement;
-  overwrite_panel: HTMLSpanElement;
-  submit_result: HTMLDivElement;
-  new_demo_code: HTMLTextAreaElement;
-
-  constructor(component: Component, options?: WidgetOptions);
-
-  select_class(class_definition: Component): void;
-  fetch_handler(url: RequestInfo | URL, body: BodyInit): void;
-  submit_demo(): Promise<void>;
-}
-
-type Widgets = {
-  Controls_Widget: typeof Controls_Widget;
-  Keyboard_Manager: typeof Keyboard_Manager;
-  Code_Manager: typeof Code_Manager;
-  Code_Widget: typeof Code_Widget;
-  Editor_Widget: typeof Editor_Widget;
-};
-
-export declare const widgets: Widgets;

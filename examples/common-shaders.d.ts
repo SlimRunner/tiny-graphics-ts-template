@@ -1,118 +1,104 @@
 import {
   GPUAddresses,
-  Shader,
-  Texture,
+  tiny,
   UBOBinding,
   UBOBlockLayout,
   Uniforms,
 } from "../tiny-graphics";
-import { Mat4, Vector3, Vector4 } from "../tiny-graphics-math";
+import { math } from "../tiny-graphics-math";
 import { Material } from "./common";
 
 interface LightSource {
-  position: Vector4;
-  color: Vector4;
+  position: math.Vector4;
+  color: math.Vector4;
   attenuation: number;
 }
 
 type FlatPhongMaterial = {
-  color: Vector4;
+  color: math.Vector4;
   ambient: number;
   diffusivity: number;
   specularity: number;
   smoothness: number;
-  texture?: Texture;
+  texture?: tiny.Texture;
 };
 
-declare class Basicer_Shader extends Shader {}
+export namespace defs {
+  export class Basicer_Shader extends tiny.Shader {}
 
-declare class Basic_Shader extends Shader {}
+  export class Basic_Shader extends tiny.Shader {}
 
-declare class Instanced_Shader extends Shader {
-  num_lights: number;
-  ubo_binding: UBOBinding;
-  ubo_layout: UBOBlockLayout;
+  export class Instanced_Shader extends tiny.Shader {
+    num_lights: number;
+    ubo_binding: UBOBinding;
+    ubo_layout: UBOBlockLayout;
 
-  constructor(num_lights?: number);
+    constructor(num_lights?: number);
 
-  update_GPU(
-    context: WebGL2RenderingContext,
-    gpu_addresses: GPUAddresses,
-    uniforms: // NOTE: is this too much?
-      | Uniforms
-      | {
-          light_space_matrix?: Mat4;
-          lights?: LightSource[];
-        },
-    model_transform: Mat4,
-    material: Material,
-  ): void;
+    update_GPU(
+      context: WebGL2RenderingContext,
+      gpu_addresses: GPUAddresses,
+      uniforms: // NOTE: is this too much?
+        | Uniforms
+        | {
+            light_space_matrix?: math.Mat4;
+            lights?: LightSource[];
+          },
+      model_transform: math.Mat4,
+      material: Material,
+    ): void;
 
-  static default_values(): {
-    color: Vector4;
-    ambient: number;
-    diffuse: Vector3;
-    specular: Vector3;
-    smoothness: number;
-  };
+    static default_values(): {
+      color: math.Vector4;
+      ambient: number;
+      diffuse: math.Vector3;
+      specular: math.Vector3;
+      smoothness: number;
+    };
+  }
+
+  export class Textured_Instanced_Shader extends Instanced_Shader {}
+
+  export class Shadow_Pass_Shader extends tiny.Shader {}
+
+  export class Shadow_Instanced_Shader extends Instanced_Shader {}
+
+  export class Shadow_Textured_Instanced_Shader extends Instanced_Shader {}
+
+  export class Phong_Shader extends tiny.Shader {
+    num_lights: number;
+    ubo_binding: UBOBinding;
+    ubo_layout: UBOBlockLayout;
+
+    constructor(num_lights?: number);
+
+    static light_source(
+      position: math.Vector4,
+      color: math.Vector4,
+      size: number,
+    ): LightSource;
+    send_material(
+      gl: WebGL2RenderingContext,
+      gpu: GPUAddresses,
+      material: Material | FlatPhongMaterial,
+    ): void;
+    send_uniforms(
+      gl: WebGL2RenderingContext,
+      gpu: GPUAddresses,
+      uniforms: Uniforms,
+      model_transform: math.Mat4,
+    ): void;
+  }
+
+  export class Textured_Phong extends Phong_Shader {
+    update_GPU(
+      context: WebGL2RenderingContext,
+      gpu_addresses: GPUAddresses,
+      uniforms: Uniforms,
+      model_transform: math.Mat4,
+      material: Material | FlatPhongMaterial,
+    ): void;
+  }
+
+  export class Fake_Bump_Map extends Textured_Phong {}
 }
-
-declare class Textured_Instanced_Shader extends Instanced_Shader {}
-
-declare class Shadow_Pass_Shader extends Shader {}
-
-declare class Shadow_Instanced_Shader extends Instanced_Shader {}
-
-declare class Shadow_Textured_Instanced_Shader extends Instanced_Shader {}
-
-declare class Phong_Shader extends Shader {
-  num_lights: number;
-  ubo_binding: UBOBinding;
-  ubo_layout: UBOBlockLayout;
-
-  constructor(num_lights?: number);
-
-  static light_source(
-    position: Vector4,
-    color: Vector4,
-    size: number,
-  ): LightSource;
-  send_material(
-    gl: WebGL2RenderingContext,
-    gpu: GPUAddresses,
-    material: Material | FlatPhongMaterial,
-  ): void;
-  send_uniforms(
-    gl: WebGL2RenderingContext,
-    gpu: GPUAddresses,
-    uniforms: Uniforms,
-    model_transform: Mat4,
-  ): void;
-}
-
-declare class Textured_Phong extends Phong_Shader {
-  update_GPU(
-    context: WebGL2RenderingContext,
-    gpu_addresses: GPUAddresses,
-    uniforms: Uniforms,
-    model_transform: Mat4,
-    material: Material | FlatPhongMaterial,
-  ): void;
-}
-
-declare class Fake_Bump_Map extends Textured_Phong {}
-
-type ShaderDefs = {
-  Basicer_Shader: typeof Basicer_Shader;
-  Basic_Shader: typeof Basic_Shader;
-  Instanced_Shader: typeof Instanced_Shader;
-  Textured_Instanced_Shader: typeof Textured_Instanced_Shader;
-  Shadow_Pass_Shader: typeof Shadow_Pass_Shader;
-  Shadow_Instanced_Shader: typeof Shadow_Instanced_Shader;
-  Shadow_Textured_Instanced_Shader: typeof Shadow_Textured_Instanced_Shader;
-  Phong_Shader: typeof Phong_Shader;
-  Textured_Phong: typeof Textured_Phong;
-  Fake_Bump_Map: typeof Fake_Bump_Map;
-}
-
-export declare const defs: ShaderDefs;
