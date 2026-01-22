@@ -1,0 +1,29 @@
+{
+  "name": "tiny-graphics-ts-template",
+  "version": "1.0.0",
+  "description": "The tiny-graphics-js library refactors common WebGL steps, demonstrating how to organize a complex graphics program.",
+  "main": "main-scene.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc",
+    "dev": "npx tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SlimRunner/tiny-graphics-ts-template.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SlimRunner/tiny-graphics-ts-template/issues"
+  },
+  "homepage": "https://github.com/SlimRunner/tiny-graphics-ts-template#readme",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
