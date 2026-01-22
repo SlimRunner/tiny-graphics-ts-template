@@ -26,7 +26,7 @@ export namespace defs {
     matrix: () => math.Mat4;
     inverse: () => math.Mat4;
 
-    constructor(props: ComponentProps, update_callback: () => void);
+    constructor(props: ComponentProps);
 
     set_recipient(
       matrix_closure: () => math.Mat4,
