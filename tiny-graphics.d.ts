@@ -59,7 +59,7 @@ export interface ComponentLayoutOptions {
 }
 
 export type MaterialRecord = {
-  shader: tiny.Shader
+  shader?: tiny.Shader
   texture?: tiny.Texture
 } & Record<string, unknown>;
 
