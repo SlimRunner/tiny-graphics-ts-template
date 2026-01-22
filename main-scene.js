@@ -28,6 +28,8 @@ import {Text_Demo}
 import {Transforms_Sandbox_Base, Transforms_Sandbox}
                     from "./examples/transforms-sandbox.js";
 
+import {Demo} from "./my_code/main.js"
+
 Object.assign (defs,
                {Minimal_Webgl_Demo},
                {Axes_Viewer, Axes_Viewer_Test_Scene, Matrix_Game},
@@ -43,7 +45,7 @@ Object.assign (defs,
 
 // ******************** SELECT THE DEMO TO DISPLAY:
 
-const main_scene        = Demonstration;
+const main_scene        = Demo;
 const additional_scenes = [];
 
 export {main_scene, additional_scenes, defs};
