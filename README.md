@@ -3,12 +3,7 @@
 This project adds type declarations for the modules in tiny graphics. Here is the link to the original project:
 - https://github.com/encyclopedia-of-code/tiny-graphics-js
 
-Currently it uses a modified version for course CS 174C which implements UBOs and other features that are still in progress in the dev branch of the original repo. There seems to be some issues with this partial port. To name a few
-
-- shape constructors use a `super(...)` syntax which is no longer valid
-- the `arrays` value has not updated for common shapes so most of them are broken (including most examples).
-
-Anyway, this project is intended to generate near native JS from type-safe TS. First install the node
+This project is intended to generate near native JS code from type-safe TS. First install the node
 ```sh
 npm install
 ```
@@ -20,7 +15,16 @@ npm run dev
 
 ## Usage
 
-Make sure you import using `.js` at the end because this project does not use a bundler, so it will not translate `import { tiny } from "../tiny-graphics";` to `import { tiny } from "../tiny-graphics.js";` for you. Therefore always include the extension `.js` since `src` and `my_code` both share the same relative position to the libraries.
+Make sure you import using `.js` at the end because this project does not use a bundler, so it will not translate `import { tiny } from "../tiny-graphics";` to `import { tiny } from "../tiny-graphics.js";` for you. This also include pure TS libraries you may add. That is use `.js` instead of `.ts`. Correct address are resolved simply because `src` and `my_code` both share the same relative position to the root. Hence the "enforced" structure is
+```
+📁 root
+├─🔹 ... other files/directories
+├─📁 my_code
+│ └─🔹 mirrors src structure and *.ts -> *.js
+└─📁 src
+  ├─📁 ... however folders you want to add
+  └─📄 *.ts
+```
 
 Other than that code as you would normally, and use the types as guide.
 
