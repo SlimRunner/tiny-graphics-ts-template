@@ -79,5 +79,3 @@ export namespace defs {
 
   export import Movement_Controls = CompNamespace.Movement_Controls;
 }
-
-export const tiny: typeof TinyNamespace;
