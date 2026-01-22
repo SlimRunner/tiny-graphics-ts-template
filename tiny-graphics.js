@@ -14,179 +14,57 @@ const {Vector3, vec3, color, Matrix, Mat4, Keyboard_Manager} = tiny;
 const Shape = tiny.Shape =
   class Shape {
       // See description at https://github.com/encyclopedia-of-code/tiny-graphics-js/wiki/tiny-graphics.js#shape
-      constructor () {
-          [this.vertices, this.indices, this.local_buffers] = [[], [], []];
-          this.attribute_counter = 0;
-          this.dirty = true;
-          this.ready = true; //Since 3d models can be not ready
-          this.gpu_instances = new Map ();      // Track which GPU contexts this object has copied itself onto.
+      constructor (...array_names) {
+          [this.arrays, this.indices] = [{}, []];
+          this.gpu_instances          = new Map ();      // Track which GPU contexts this object has copied itself onto.
+
+          // Initialize a blank array member of the Shape with each of the names provided:
+          for (let name of array_names) this.arrays[ name ] = [];
       }
-      fill_buffer( selection_of_attributes, buffer_hint = "STATIC_DRAW", divisor = 0 ) {
-        if( !this.vertices[0] )
-          return;
-
-        this.dirty = true;
-        // Check if this is a new call, a repeat call, or an invalid call.
-        let buffer_to_overwrite = null;
-        for( let index of this.local_buffers.keys() ) {
-          const buffer_info = this.local_buffers[index];
-          if( buffer_info.attributes[0] != selection_of_attributes[0] )
-            continue;
-          if( !buffer_info.attributes.every( (x,i) => x == selection_of_attributes[i] ) )
-            throw "A call to fill_buffer() has been made that did not match the grouping of attributes used in previous calls.";
-          buffer_to_overwrite = index;
-        }
-
-        // Visit first vertex to note how big the type of each fields/attribute is.  Assume all others will match.
-        // TODO:  Allow mat2/mat3/mat4 attribute types as well.  Test single float attribute type.
-        let attribute_sizes = selection_of_attributes.map( a => this.vertices[0][a].length || 1 );
-        const attribute_is_matrix = selection_of_attributes.map( a => this.vertices[0][a] instanceof Matrix );
-        let squared_sizes = attribute_sizes.map( (a,i) => Math.pow(a, 1 + attribute_is_matrix[i]) );
-
-        // When a new buffer is requested by using a group of attributes not seen before, make a buffer.
-        if( !buffer_to_overwrite ) {
-          // TODO:  This part assumes a vertex type of FLOAT.  May need to override.
-          const stride = squared_sizes.reduce( (acc,x) => acc + x * 4, 0 );
-
-          const offsets = [];
-          let offset = 0;
-          for( let index = 0; index < selection_of_attributes.length; index++ ) {
-              offsets[index] = offset;
-              offset += 4*squared_sizes[index];
-          }
-          buffer_to_overwrite = this.local_buffers.push(
-            {attributes:  [ ...selection_of_attributes ],
-              sizes: attribute_sizes, attribute_is_matrix, offsets, stride, divisor, hint: buffer_hint,
-              vertices_length: this.vertices.length, override: false,
-              data: new Float32Array (stride/4 * this.vertices.length) }) - 1;
-        }
-        // If a buffer already exists but we need a bigger one to hold all our data
-        else if (this.local_buffers[buffer_to_overwrite].vertices_length < this.vertices.length) {
-          const stride = squared_sizes.reduce( (acc,x) => acc + x * 4, 0 );
-          this.local_buffers[buffer_to_overwrite].vertices_length = this.vertices.length;
-          this.local_buffers[buffer_to_overwrite].override = true;
-          this.local_buffers[buffer_to_overwrite].data = new Float32Array (stride/4 * this.vertices.length);
-        }
-
-        const buffer = this.local_buffers[buffer_to_overwrite];
-
-        // Fill in the selected buffer locally with the user's updated values from each vertex field.
-        let pos = 0;
-        for (let v of this.vertices)
-          for (let a of selection_of_attributes.keys()){
-
-            const attr = selection_of_attributes[a];
-
-            if(attribute_sizes[a] == 1) {
-              if( buffer.data[pos] != v[attr] )
-                buffer.dirty = true;
-              buffer.data[pos] = v[attr];
-              pos++;
-            }
-            else if( attribute_is_matrix[a] ) {
-              for (let i=0; i < v[attr].length; i++) {
-                for (let j=0; j < v[attr].length; j++) {
-                  if( buffer.data[pos] != v[attr][i][j] )
-                    buffer.dirty = true;
-                  buffer.data[pos] = v[attr][i][j];
-                  pos++;
-                }
-              }
-            }
-            else
-              for (let i=0; i < attribute_sizes[a]; i++) {
-                if( buffer.data[pos] != v[attr][i] )
-                  buffer.dirty = true;
-                buffer.data[pos] = v[attr][i];
-                pos++;
-              }
-          }
-      }
-      copy_onto_graphics_card (context, write_to_indices = true) {
-          if( !this.local_buffers.length)
-            return;
-          const gl = context;
+      copy_onto_graphics_card (context, selection_of_arrays = Object.keys (this.arrays), write_to_indices = true) {
+          // Define what this object should store in each new WebGL Context:
+          const defaults = {webGL_buffer_pointers: {}};
 
           // When this Shape sees a new GPU context (in case of multiple drawing areas), copy the Shape to the GPU. If
           // it already was copied over, get a pointer to the existing instance.
           const existing_instance = this.gpu_instances.get (context);
+          if ( !existing_instance) test_rookie_mistake ();
 
           // If this Shape was never used on this GPU context before, then prepare new buffer indices for this context.
-          let gpu_instance = existing_instance;
-          if(!existing_instance) {
-            test_rookie_mistake ();
-            const defaults = { VAO: gl.createVertexArray () };
-            gpu_instance = this.gpu_instances.set (context, defaults).get (context);
-          }
-          gl.bindVertexArray( gpu_instance.VAO );
+          const gpu_instance = existing_instance || this.gpu_instances.set (context, defaults).get (context);
 
-          for( let index of this.local_buffers.keys() ) {
+          const gl = context;
 
-            let buffer_info = this.local_buffers[index];
-            // Only update the subset of buffers that have changed, from the selection provided.
-            if( !buffer_info.dirty)
-              continue;
-            buffer_info.dirty = false;
+          const write = existing_instance ? (target, data) => gl.bufferSubData (target, 0, data)
+                                          : (target, data) => gl.bufferData (target, data, gl.STATIC_DRAW);
 
-            let existing_pointer = buffer_info.gpu_pointer;
-            buffer_info.gpu_pointer = buffer_info.gpu_pointer ?? gl.createBuffer();
-            gl.bindBuffer (gl.ARRAY_BUFFER, buffer_info.gpu_pointer);
-
-            if (existing_pointer !== undefined && !buffer_info.override)
-              gl.bufferSubData (gl.ARRAY_BUFFER, 0, buffer_info.data)
-            else {
-              gl.bufferData (gl.ARRAY_BUFFER, buffer_info.data, gl[buffer_info.hint]);
-              buffer_info.override = false;
-            }
-
-            for( let i of buffer_info.attributes.keys()) {
-
-              if( buffer_info.attribute_is_matrix[i] )
-                for( let row = 0; row < buffer_info.sizes[i]; row++ ) {
-                  gl.vertexAttribPointer(this.attribute_counter, buffer_info.sizes[i], gl.FLOAT, false, buffer_info.stride, buffer_info.offsets[i] + row * buffer_info.sizes[i] * 4);
-                  gl.vertexAttribDivisor(this.attribute_counter, buffer_info.divisor);
-                  gl.enableVertexAttribArray (this.attribute_counter);
-                  this.attribute_counter++;
-                }
-              else {
-
-                // TODO: Support normalization of attributes; allow the user to specify.
-                // This assumes some stuff about the shader: Vertex fields are interleaved; vertex fields are
-                // in the same order that they'll appear in the shader (using offset keyword).
-                gl.vertexAttribPointer(this.attribute_counter, buffer_info.sizes[i], gl.FLOAT, false, buffer_info.stride, buffer_info.offsets[i]);
-                gl.vertexAttribDivisor(this.attribute_counter, buffer_info.divisor);
-                gl.enableVertexAttribArray (this.attribute_counter);
-                this.attribute_counter++;
-              }
-            }
+          for (let name of selection_of_arrays) {
+              if ( !existing_instance)
+                  gpu_instance.webGL_buffer_pointers[ name ] = gl.createBuffer ();
+              gl.bindBuffer (gl.ARRAY_BUFFER, gpu_instance.webGL_buffer_pointers[ name ]);
+              write (gl.ARRAY_BUFFER, Matrix.flatten_2D_to_1D (this.arrays[ name ]));
           }
           if (this.indices.length && write_to_indices) {
               if ( !existing_instance)
                   gpu_instance.index_buffer = gl.createBuffer ();
               gl.bindBuffer (gl.ELEMENT_ARRAY_BUFFER, gpu_instance.index_buffer);
-              if (existing_instance)
-                gl.bufferSubData (gl.ELEMENT_ARRAY_BUFFER, 0, new Uint32Array (this.indices))
-              else
-                gl.bufferData (gl.ELEMENT_ARRAY_BUFFER, new Uint32Array (this.indices), gl["STATIC_DRAW"]);
+              write (gl.ELEMENT_ARRAY_BUFFER, new Uint32Array (this.indices));
           }
-          gl.bindVertexArray(null);
-          this.dirty = false;
           return gpu_instance;
       }
-      execute_shaders (gl, gpu_instance, type, instances) {
+      execute_shaders (gl, gpu_instance, type) {
           if (this.indices.length) {
               gl.bindBuffer (gl.ELEMENT_ARRAY_BUFFER, gpu_instance.index_buffer);
-              gl.drawElementsInstanced (gl[ type ], this.indices.length, gl.UNSIGNED_INT, 0, instances);
-          } else gl.drawArraysInstanced (gl[ type ], 0, this.num_vertices, instances);
+              gl.drawElements (gl[ type ], this.indices.length, gl.UNSIGNED_INT, 0);
+          } else gl.drawArrays (gl[ type ], 0, Object.values (this.arrays)[ 0 ].length);
       }
-      draw (webgl_manager, uniforms, model_transform, material, type = "TRIANGLES", instances) {
-          let gpu_instance = this.gpu_instances.get (webgl_manager.context);
-          if( !gpu_instance || this.dirty)
-            gpu_instance = this.copy_onto_graphics_card (webgl_manager.context);
-          webgl_manager.context.bindVertexArray( gpu_instance.VAO );
-          material.shader.activate (webgl_manager.context, uniforms, model_transform, material);
+      draw (webgl_manager, uniforms, model_transform, material, type = "TRIANGLES") {
+          const gpu_instance = this.gpu_instances.get (webgl_manager.context) ||
+                               this.copy_onto_graphics_card (webgl_manager.context);
+          material.shader.activate (webgl_manager.context, gpu_instance.webGL_buffer_pointers, uniforms,
+                                    model_transform, material);
           // Run the shaders to draw every triangle now:
-          this.execute_shaders (webgl_manager.context, gpu_instance, type, instances);
+          this.execute_shaders (webgl_manager.context, gpu_instance, type);
       }
 
       // NOTE: All the below functions make a further assumption: that your vertex buffer includes fields called
@@ -251,21 +129,17 @@ const Shape = tiny.Shape =
           }
       }
       normalize_positions (keep_aspect_ratios = true) {
-          let p_arr              = this.vertices.map(item => item.position);
+          let p_arr              = this.arrays.position;
           const average_position = p_arr.reduce ((acc, p) => acc.plus (p.times (1 / p_arr.length)), vec3 (0, 0, 0));
           p_arr                  = p_arr.map (p => p.minus (average_position));           // Center the point cloud on
                                                                                           // the origin.
           const average_lengths = p_arr.reduce ((acc, p) =>
                                                   acc.plus (p.map (x => Math.abs (x)).times (1 / p_arr.length)),
                                                 vec3 (0, 0, 0));
-          let final_positions = [];
           if (keep_aspect_ratios)                            // Divide each axis by its average distance from the origin.
-              final_positions = p_arr.map (p => p.map ((x, i) => x / average_lengths[ i ]));
+              this.arrays.position = p_arr.map (p => p.map ((x, i) => x / average_lengths[ i ]));
           else
-              final_positions = p_arr.map (p => p.times (1 / average_lengths.norm ()));
-
-          for (var i = 0; i < final_positions.length; i++)
-            this.vertices[i].position = final_positions[i];
+              this.arrays.position = p_arr.map (p => p.times (1 / average_lengths.norm ()));
       }
   };
 
@@ -273,11 +147,11 @@ const test_rookie_mistake = function () {
     test_rookie_mistake.counter |= 0;
     if (test_rookie_mistake.counter++ > 200)
         throw `Error: You are sending a lot of object definitions to the GPU, probably by mistake!  Many are likely
-        duplicates, which you don't want since sending each one is very slow.  TO FIX THIS: Avoid ever declaring a
+        duplicates, which you don't want since sending each one is very slow.  TO FIX THIS: Avoid ever declaring a 
         Shape, Shader, or Texture with "new" anywhere that's called repeatedly (such as inside render_animation()).
-        You don't want simple definitions to be re-created and re-transmitted every frame.  Your scene's constructor is
+        You don't want simple definitions to be re-created and re-transmitted every frame.  Your scene's constructor is 
         a better option; it's only called once.  Call "new" there instead, then keep the result as a class member.  If
-        you somehow have a deformable shape that must really be updated every frame, then refer to the documentation of
+        you somehow have a deformable shape that must really be updated every frame, then refer to the documentation of 
         copy_onto_graphics_card() -- you need a special call to it rather than calling new.`;
 };
 
@@ -308,6 +182,22 @@ const Shader = tiny.Shader =
                       let u     = gl.getActiveUniform (program, i).name.split ('[')[ 0 ];
                       this[ u ] = gl.getUniformLocation (program, u);
                   }
+
+                  this.shader_attributes     = {};
+                  // Assume per-vertex attributes will each be a set of 1 to 4 floats:
+                  const type_to_size_mapping = {0x1406: 1, 0x8B50: 2, 0x8B51: 3, 0x8B52: 4};
+                  const numAttribs           = gl.getProgramParameter (program, gl.ACTIVE_ATTRIBUTES);
+                  // https://github.com/greggman/twgl.js/blob/master/dist/twgl-full.js for another example:
+                  for (let i = 0; i < numAttribs; i++) {
+                      const attribInfo                          = gl.getActiveAttrib (program, i);
+                      // Pointers to all shader attribute variables:
+                      this.shader_attributes[ attribInfo.name ] = {
+                          index     : gl.getAttribLocation (program, attribInfo.name),
+                          size      : type_to_size_mapping[ attribInfo.type ],
+                          enabled   : true, type: gl.FLOAT,
+                          normalized: false, stride: 0, pointer: 0
+                      };
+                  }
               }
           }
 
@@ -333,53 +223,52 @@ const Shader = tiny.Shader =
           gl.attachShader (program, fragShdr);
           gl.linkProgram (program);
           if ( !gl.getProgramParameter (program, gl.LINK_STATUS))
-              throw "Shader linker error: " + gl.getProgramInfoLog (program);
-
-          //Init UBO for the Camera and Lights
-          this.init_UBO(gl, program, Shader.mapping_UBO());
+              throw "Shader linker error: " + gl.getProgramInfoLog (this.program);
 
           Object.assign (gpu_instance,
                          {program, vertShdr, fragShdr, gpu_addresses: new Graphics_Addresses (program, gl)});
           return gpu_instance;
       }
-      activate (context, uniforms, model_transform, material) {
+      activate (context, buffer_pointers, uniforms, model_transform, material) {
           // Track which GPU contexts this object has copied itself onto:
-          if ( !this.gpu_instances) this.gpu_instances =  new Map ();
+          if ( !this.gpu_instances) this.gpu_instances = new Map ();
           const gpu_instance = this.gpu_instances.get (context) || this.copy_onto_graphics_card (context);
 
-          // TODO:  Cache this
           context.useProgram (gpu_instance.program);
 
-          // TODO:  Use UBO instead:
           // --- Send over all the values needed by this particular shader to the GPU: ---
           this.update_GPU (context, gpu_instance.gpu_addresses, uniforms, model_transform, material);
-      }
 
-      init_UBO (gl, program, ubo_binding) {
-        var ubo_index = 0;
-        for (var i = 0; i < ubo_binding.length; i++) {
-          ubo_index = gl.getUniformBlockIndex(program, ubo_binding[i].shader_name);
-          if (ubo_index !== gl.INVALID_INDEX)
-            gl.uniformBlockBinding(program, ubo_index, ubo_binding[i].binding_point);
-        }
-      }
-
-      bind_UBO (gl, program, shader_name, binding_point) {
-        var ubo_index = gl.getUniformBlockIndex(program, shader_name);
-        gl.uniformBlockBinding(program, ubo_index, binding_point);
-      }
-
-      // Your custom Shader has to override the following functions:
+          // --- Turn on all the correct attributes and make sure they're pointing to the correct ranges in GPU
+          // memory. ---
+          for (let [attr_name, attribute] of Object.entries (gpu_instance.gpu_addresses.shader_attributes)) {
+              if ( !attribute.enabled) {
+                  if (attribute.index >= 0) context.disableVertexAttribArray (attribute.index);
+                  continue;
+              }
+              context.enableVertexAttribArray (attribute.index);
+              context.bindBuffer (context.ARRAY_BUFFER, buffer_pointers[ attr_name ]);    // Activate the correct
+                                                                                          // buffer.
+              context.vertexAttribPointer (attribute.index, attribute.size, attribute.type,            // Populate each attribute
+                                           attribute.normalized, attribute.stride, attribute.pointer);       // from
+                                                                                                             // the
+                                                                                                             // active
+                                                                                                             // buffer.
+          }
+      }                           // Your custom Shader has to override the following functions:
       vertex_glsl_code () {}
       fragment_glsl_code () {}
-      update_GPU () {}
-      static default_values () {}
-      static mapping_UBO () {
-        return [
-          {shader_name: "Camera", binding_point: 0},
-          {shader_name: "Lights", binding_point: 1},
-        ];
+      static default_uniforms () {
+          return {
+              camera_inverse      : Mat4.identity (),
+              camera_transform    : Mat4.identity (),
+              projection_transform: Mat4.identity (),
+              animate             : true,
+              animation_time      : 0,
+              animation_delta_time: 0
+          };
       }
+      update_GPU () {}
       static assign_camera (camera_inverse, uniforms) {
           Object.assign (uniforms, {camera_inverse, camera_transform: Mat4.inverse (camera_inverse)});
       }
@@ -440,97 +329,11 @@ const Texture = tiny.Texture =
       }
   };
 
-  const Shadow_Map = tiny.Shadow_Map =
-  class Shadow_Map {
-      constructor (width, height, min_filter = "NEAREST", mag_filter = "NEAREST") {
-          Object.assign (this, {width, height, min_filter, mag_filter, ready:true});
-
-          if ( !this.gpu_instances) this.gpu_instances = new Map ();     // Track which GPU contexts this object has
-                                                                         // copied itself onto.
-      }
-      copy_onto_graphics_card (context) {
-
-          const existing_instance = this.gpu_instances.get (context);
-          if ( !existing_instance) test_rookie_mistake ();
-
-          // If this Texture was never used on this GPU context before, then prepare new buffer indices for this
-          // context.
-          const gpu_instance = existing_instance || this.gpu_instances.set (context, {}).get (context);
-
-          if ( !gpu_instance.fbo_pointer) gpu_instance.fbo_pointer = context.createFramebuffer ();
-          if ( !gpu_instance.texture_buffer_pointer) gpu_instance.texture_buffer_pointer = context.createTexture ();
-
-          const gl = context;
-          gl.bindTexture (gl.TEXTURE_2D, gpu_instance.texture_buffer_pointer);
-          gl.bindFramebuffer(gl.FRAMEBUFFER, gpu_instance.fbo_pointer);
-
-          gl.pixelStorei (gl.UNPACK_FLIP_Y_WEBGL, true);
-
-          gl.texStorage2D(
-            gl.TEXTURE_2D,      // target
-            1,                  // mip levels
-            gl.DEPTH_COMPONENT16, // internal format
-            this.width, this.height
-          );
-          // gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT16, this.width, this.height, 0,
-          //   gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
-
-          // Always use bi-linear sampling when zoomed out.
-          gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl[ this.mag_filter ]);
-          // Apply user-defined sampling method when zoomed in.
-          gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl[ this.min_filter ]);
-          gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl[ "CLAMP_TO_EDGE" ]);
-          gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl[ "CLAMP_TO_EDGE" ]);
-          //gl.texParameterf (gl.TEXTURE_2D, gl.TEXTURE_BORDER_COLOR, [1.0, 1.0, 1.0, 1.0]);
-
-
-
-
-  // const tex = gl.createTexture();
-  // gl.bindTexture(gl.TEXTURE_3D, tex);
-  // gl.texImage3D(gl.TEXTURE_3D, 0, gl.RGBA8, this.width, this.height, depth of texture???, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-
-  // gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT16, tex, 0, light.index);
-
-
-
-
-
-
-
-          //onto the fbo
-          gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, gpu_instance.texture_buffer_pointer, 0);
-
-          gl.drawBuffers ([gl.NONE]);
-          gl.readBuffer (gl.NONE);
-
-          gl.bindFramebuffer (gl.FRAMEBUFFER, null);
-          gl.bindTexture( gl.TEXTURE_2D, null);
-
-          return gpu_instance;
-      }
-      activate (gl, texture_unit = 0, treat_as_fbo = false) {
-          const gpu_instance = this.gpu_instances.get (gl) || this.copy_onto_graphics_card (gl);
-          if( treat_as_fbo ) {
-            gl.viewport (0, 0, this.width, this.height);
-            gl.bindFramebuffer (gl.FRAMEBUFFER, gpu_instance.fbo_pointer);
-            gl.clear (gl.DEPTH_BUFFER_BIT);
-          }
-          gl.activeTexture (gl[ "TEXTURE" + texture_unit ]);
-          gl.bindTexture (gl.TEXTURE_2D, gpu_instance.texture_buffer_pointer);
-      }
-      deactivate (caller, treat_as_fbo = false) {
-        if (treat_as_fbo) {
-          caller.context.viewport(0, 0, caller.width, caller.height);
-          caller.context.bindFramebuffer (caller.context.FRAMEBUFFER, null);
-        }
-        caller.context.bindTexture( caller.context.TEXTURE_2D, null);
-      }
-  };
 
 const Component = tiny.Component =
   class Component {
       // See description at https://github.com/encyclopedia-of-code/tiny-graphics-js/wiki/tiny-graphics.js#component
+      uniforms = Shader.default_uniforms ();
       constructor (props = {}) {
           const rules = [
               `.documentation_treenode { }`,
@@ -541,7 +344,6 @@ const Component = tiny.Component =
 
           this.props = props;
           if (this.props.uniforms) this.uniforms = this.props.uniforms;
-          else this.uniforms = Component.default_uniforms ();
 
           this.animated_children  = [];
           this.document_children  = [];
@@ -558,16 +360,6 @@ const Component = tiny.Component =
           this.init ();
       }
       static types_used_before = new Set ();
-      static default_uniforms () {
-          return {
-              camera_inverse      : Mat4.identity (),
-              camera_transform    : Mat4.identity (),
-              projection_transform: Mat4.identity (),
-              animate             : true,
-              animation_time      : 0,
-              animation_delta_time: 0
-          };
-      }
       static initialize_CSS (classType, rules) {
           if (Component.types_used_before.has (classType))
               return;
@@ -578,13 +370,17 @@ const Component = tiny.Component =
       }
       make_context (canvas, background_color = color (0, 0, 0, 1), dimensions) {
           this.canvas              = canvas;
-          this.context = canvas.getContext("webgl2");
+          const try_making_context = name => this.context = this.canvas.getContext (name);
+          for (let name of ["webgl2"])
+              if (try_making_context (name)) break;
           if ( !this.context) throw "Canvas failed to make a WebGL context.";
           const gl = this.context;
 
           this.set_canvas_size (dimensions);
           // Tell the GPU which color to clear the canvas with each frame.
           gl.clearColor.apply (gl, background_color);
+          // Load an extension to allow shapes with more than 65535 vertices.
+          gl.getExtension ("OES_element_index_uint");
           gl.enable (gl.DEPTH_TEST);                            // Enable Z-Buffering test.
           // Specify an interpolation method for blending "transparent" triangles over the existing pixels:
           gl.enable (gl.BLEND);
@@ -722,159 +518,3 @@ const Component = tiny.Component =
       render_explanation () {}
       render_controls () {}     // render_controls(): Called by Controls_Widget for generating interactive UI.
   };
-
-
-
-const UBO = tiny.UBO =
-class UBO  {
-  constructor (gl, buffer_name, buffer_size, buffer_layout) {
-
-    this.items = {};
-
-    for (var i = 0; i < buffer_layout.length; i++) {
-      for ( var j = 0; j < buffer_layout[i].data_layout.length; j++) {
-        this.items[buffer_layout[i].data_layout[j].name] = { //offset of the whole data_layout in the whole ubo buffer
-                                                             data_layout_offset: buffer_layout[i].data_offset,
-                                                             //length of the data_layout
-                                                             data_layout_length: buffer_layout[i].data_length,
-                                                             //offset of the item within the data_layout
-                                                             offset: buffer_layout[i].data_layout[j].offset,
-                                                             data_length: buffer_layout[i].data_layout[j].data_length,
-                                                             chunk_length: buffer_layout[i].data_layout[j].chunk_length,
-                                                            };
-      }
-    }
-
-    this.gl = gl;
-    this.buffer_name = buffer_name;
-
-    this.buffer = gl.createBuffer ();
-    gl.bindBuffer (gl.UNIFORM_BUFFER, this.buffer);
-    gl.bufferData (gl.UNIFORM_BUFFER, buffer_size, gl.DYNAMIC_DRAW);
-    gl.bindBuffer (gl.UNIFORM_BUFFER, null);
-  }
-
-  bind (binding_point) {
-    this.binding_point = binding_point;
-    this.gl.bindBufferBase (this.gl.UNIFORM_BUFFER, binding_point, this.buffer);
-  }
-
-  update (buffer_name, buffer_data, num_instance = 0) {
-    if (buffer_data instanceof Matrix)
-      buffer_data = Matrix.flatten_2D_to_1D(buffer_data.transposed());
-
-    //Force the data to be Float32Array
-    if (!(buffer_data instanceof Float32Array)) {
-      if ( Array.isArray(buffer_data))
-        buffer_data = new Float32Array(buffer_data);
-      else
-        buffer_data = new Float32Array([buffer_data]);
-    }
-
-    var ref = this.items[buffer_name];
-    var buffer_offset = ref.data_layout_offset + ref.data_layout_length * num_instance + ref.offset;
-
-    this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
-    this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, buffer_offset, buffer_data, 0, null);
-    this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
-
-    return this;
-  }
-
-  static create (gl, block_name, buffer_layout) {
-
-    var buffer_size = 0;
-
-    for ( var i = 0; i < buffer_layout.length; i++ ) {
-      var data_size = UBO.calculate(buffer_layout[i].data_layout); //size occupied by a single instance, 16b aligned
-      buffer_layout[i].data_length = data_size;
-      buffer_size += data_size * buffer_layout[i].num_instances;
-
-      if (i > 0)
-        buffer_layout[i].data_offset = buffer_layout[i-1].data_offset + buffer_layout[i-1].num_instances * buffer_layout[i-1].data_length;
-      else
-        buffer_layout[i].data_offset = 0;
-
-    }
-    UBO.Cache[block_name] = new UBO(gl, block_name, buffer_size, buffer_layout);
-  }
-
-  static get_size (type) { //[Alignment,Size]
-    switch (type) {
-      case "float":
-      case "int":
-      case "bool":
-        return [4,4];
-      case "Mat4":
-        return [64,64]; //16*4
-      case "Mat3":
-        return [48,48]; //16*3
-      case "vec2":
-        return [8,8];
-      case "vec3":
-        return [16,12]; //Special Case
-      case "vec4":
-        return [16,16];
-      default:
-        return [0,0];
-    }
-  }
-
-  static calculate(buffer_layout) {
-    var chunk = 16;	//Data size in Bytes, UBO using layout std140 needs to build out the struct in chunks of 16 bytes.
-    var temp_size = 0;	//Temp Size, How much of the chunk is available after removing the data size from it
-    var offset = 0;	//Offset in the buffer allocation
-    var size;		//Data Size of the current type
-
-    for (var i=0; i < buffer_layout.length; i++) {
-      //When dealing with arrays, Each element takes up 16 bytes regardless of type.
-      if (!buffer_layout[i].length || buffer_layout[i].length == 0)
-        size = UBO.get_size(buffer_layout[i].type);
-      else
-        size = [buffer_layout[i].length * 16, buffer_layout[i].length * 16];
-
-      temp_size = chunk - size[0];	//How much of the chunk exists after taking the size of the data.
-
-      //Chunk has been overdrawn when it already has some data resurved for it.
-      if (temp_size < 0 && chunk < 16) {
-        offset += chunk;						//Add Remaining Chunk to offset...
-        if (i > 0)
-          buffer_layout[i-1].chunk_length += chunk;	//So the remaining chunk can be used by the last variable
-        chunk = 16;								//Reset Chunk
-        if(buffer_layout[i].type == "vec3")
-          chunk -= size[1];	//If Vec3 is the first var in the chunk, subtract size since size and alignment is different.
-      }
-      else if (temp_size < 0 && chunk == 16) {
-        //Do nothing incase data length is >= to unused chunk size.
-        //Do not want to change the chunk size at all when this happens.
-      }
-      else if (temp_size == 0) { //If evenly closes out the chunk, reset
-
-        if(buffer_layout[i].type == "vec3" && chunk == 16)
-          chunk -= size[1];	//If Vec3 is the first var in the chunk, subtract size since size and alignment is different.
-        else
-          chunk = 16;
-      }
-      else
-        chunk -= size[1];	//Chunk isn't filled, just remove a piece
-
-      //Add some data of how the chunk will exist in the buffer.
-      buffer_layout[i].offset	= offset;
-      buffer_layout[i].chunk_length	= size[1];
-      buffer_layout[i].data_length = size[1];
-
-      offset += size[1];
-    }
-
-    //Check if the final offset is divisiable by 16, if not add remaining chunk space to last element.
-    if (offset % 16 != 0) {
-      buffer_layout[buffer_layout.length-1].chunk_length += 16 - offset % 16;
-      offset += 16 - offset % 16;
-    }
-
-    return offset;
-  }
-
-};
-
-UBO.Cache = []; //To be on the gl object!!!

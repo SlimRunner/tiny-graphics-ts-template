@@ -1,6 +1,6 @@
 import {tiny} from '../tiny-graphics.js';
 // Pull these names into this module's scope for convenience:
-const {Vector, Vector3, vec, vec2, vec3, vec4, color, Matrix, Mat4, Shape, Shader, Component} = tiny;
+const {Vector, Vector3, vec, vec3, vec4, color, Matrix, Mat4, Shape, Shader, Component} = tiny;
 
 const defs = {};
 
@@ -8,32 +8,26 @@ export {tiny, defs};
 
 const Triangle = defs.Triangle =
   class Triangle extends Shape {
-      // **Triangle** The simplest possible 2D Shape – one triangle.  It stores 3 corner vertices, each with sufficient data to shade them.
-
+      // **Triangle** The simplest possible 2D Shape – one triangle.  It stores 3 vertices,
+      // each having their own 3D position, normal vector, and texture-space coordinate.
       constructor () {
-          super ();
-
-          // Multiple data fields live at our triangle's corner points, besides just a position.  We will describe one "vertex" as the combination of a position, a normal vector, and lastly a coordinate in texture image space in case a texture image is applied.
-
-          // Vertex positions: the three point locations of an imaginary triangle.
-          // "Normal" vectors:  Vectors that point away from the triangle face.  They're needed so the graphics engine can know if the shape is pointed at light or not, and then color it accordingly.
-          // Texture coordinates: Points in the seperate 2D X/Y pixel space belonging to any 2D images we might like to paint the shape with.
-          this.vertices[0] = { position: vec3 (0, 0, 0),
-                               normal: vec3 (0, 0, 1),
-                               texture_coord: vec (0, 0) };
-
-          this.vertices[1] = { position: vec3 (1, 0, 0),
-                               normal: vec3 (0, 0, 1),
-                               texture_coord: vec (1, 0) };
-
-          this.vertices[2] = { position: vec3 (0, 1, 0),
-                               normal: vec3 (0, 0, 1),
-                               texture_coord: vec (0, 1) };
-
-          // Next, describe how to connect whole triangles out of individual vertices.  Say a list of indices of vertex entries in your desired order. Every three indices in "this.indices" traces out one triangle.
+          // Name the values we'll define per each vertex:
+          super ("position", "normal", "texture_coord");
+          // First, specify the vertex positions -- the three point locations of an imaginary triangle:
+          this.arrays.position = [vec3 (0, 0, 0), vec3 (1, 0, 0), vec3 (0, 1, 0)];
+          // Next, supply vectors that point away from the triangle face.  They should match up with
+          // the points in the above list.  Normal vectors are needed so the graphics engine can
+          // know if the shape is pointed at light or not, and color it accordingly.
+          this.arrays.normal = [vec3 (0, 0, 1), vec3 (0, 0, 1), vec3 (0, 0, 1)];
+          //  Lastly, each point also simultaneously exists somewhere in texture space (the
+          //  X/Y pixel space belonging to any 2D images we might like to paint the shape with):
+          this.arrays.texture_coord = [Vector.of (0, 0), Vector.of (1, 0), Vector.of (0, 1)];
+          // Index into our vertices to connect them into a whole triangle:
           this.indices              = [0, 1, 2];
-
-          this.fill_buffer ("position", "normal", "texture_coord")
+          // A position, normal, and texture coord fully describes one "vertex".  What's the "i"th vertex?  Simply
+          // the combined data you get if you look up index "i" of those lists above -- a position, normal vector,
+          // and texture coordinate together.  Lastly we told it how to connect vertex entries into triangles.
+          // Every three indices in "this.indices" traces out one triangle.
       }
   };
 
@@ -50,7 +44,7 @@ const Square = defs.Square =
           this.arrays.position      = Vector3.cast ([-1, -1, 0], [1, -1, 0], [-1, 1, 0], [1, 1, 0]);
           this.arrays.normal        = Vector3.cast ([0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1]);
           // Arrange the vertices into a square shape in texture space too:
-          this.arrays.texture_coord = Vector.create ([0, 0], [1, 0], [0, 1], [1, 1]);
+          this.arrays.texture_coord = Vector.cast ([0, 0], [1, 0], [0, 1], [1, 1]);
           // Use two triangles this time, indexing into four distinct vertices:
           this.indices.push (0, 1, 2, 1, 3, 2);
       }
@@ -70,22 +64,22 @@ const Tetrahedron = defs.Tetrahedron =
           if ( !using_flat_shading) {
               // Method 1:  A tetrahedron with shared vertices.  Compact, performs better,
               // but can't produce flat shading or discontinuous seams in textures.
-              this.arrays.position      = Vector.create ([0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]);
-              this.arrays.normal        = Vector.create ([-a, -a, -a], [1, 0, 0], [0, 1, 0], [0, 0, 1]);
-              this.arrays.texture_coord = Vector.create ([0, 0], [1, 0], [0, 1], [1, 1]);
+              this.arrays.position      = Vector.cast ([0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]);
+              this.arrays.normal        = Vector.cast ([-a, -a, -a], [1, 0, 0], [0, 1, 0], [0, 0, 1]);
+              this.arrays.texture_coord = Vector.cast ([0, 0], [1, 0], [0, 1], [1, 1]);
               // Notice the repeats in the index list.  Vertices are shared
               // and appear in multiple triangles with this method.
               this.indices.push (0, 1, 2, 0, 1, 3, 0, 2, 3, 1, 2, 3);
           } else {
               // Method 2:  A tetrahedron with four independent triangles.
-              this.arrays.position = Vector.create ([0, 0, 0], [1, 0, 0], [0, 1, 0],
+              this.arrays.position = Vector.cast ([0, 0, 0], [1, 0, 0], [0, 1, 0],
                                                   [0, 0, 0], [1, 0, 0], [0, 0, 1],
                                                   [0, 0, 0], [0, 1, 0], [0, 0, 1],
                                                   [0, 0, 1], [1, 0, 0], [0, 1, 0]);
 
               // The essence of flat shading:  This time, values of normal vectors can
               // be constant per whole triangle.  Repeat them for all three vertices.
-              this.arrays.normal = Vector.create ([0, 0, -1], [0, 0, -1], [0, 0, -1],
+              this.arrays.normal = Vector.cast ([0, 0, -1], [0, 0, -1], [0, 0, -1],
                                                 [0, -1, 0], [0, -1, 0], [0, -1, 0],
                                                 [-1, 0, 0], [-1, 0, 0], [-1, 0, 0],
                                                 [a, a, a], [a, a, a], [a, a, a]);
@@ -94,7 +88,7 @@ const Tetrahedron = defs.Tetrahedron =
               // image is mapped onto each face).  We couldn't do this with shared
               // vertices since this features abrupt transitions when approaching the
               // same point from different directions.
-              this.arrays.texture_coord = Vector.create ([0, 0], [1, 0], [1, 1],
+              this.arrays.texture_coord = Vector.cast ([0, 0], [1, 0], [1, 1],
                                                        [0, 0], [1, 0], [1, 1],
                                                        [0, 0], [1, 0], [1, 1],
                                                        [0, 0], [1, 0], [1, 1]);
@@ -128,7 +122,7 @@ const Windmill = defs.Windmill =
               var newNormal = spin.times (vec4 (0, 0, 1, 0)).to3 ();
               // Propagate the same normal to all three vertices:
               this.arrays.normal.push (newNormal, newNormal, newNormal);
-              this.arrays.texture_coord.push (...Vector.create ([0, 0], [0, 1], [1, 0]));
+              this.arrays.texture_coord.push (...Vector.cast ([0, 0], [0, 1], [1, 0]));
               // Procedurally connect the 3 new vertices into triangles:
               this.indices.push (3 * i, 3 * i + 1, 3 * i + 2);
           }
@@ -412,284 +406,14 @@ const Axis_Arrows = defs.Axis_Arrows =
       }
   };
 
-const Instanced_Shape = defs.Instanced_Shape =
-  class Instanced_Shape extends tiny.Shape {
-      // A truly minimal triangle, with three vertices each holding a 3D position and a color.
-      constructor () {
-          super();
-          // Describe the where the points of a triangle are in space, and also describe their colors:
-          this.vertices[0] = { position: vec3 (0, 0, 0), color: color (1, 0, 0, 1) };
-          this.vertices[1] = { position: vec3 (1, 0, 0), color: color (0, 1, 0, 1) };
-          this.vertices[2] = { position: vec3 (0, 1, 0), color: color (0, 0, 1, 1) };
-
-          this.fill_buffer( ["position", "color"] );
-
-          this.single_triangle = this.vertices;
-      }
-  };
-
-  const Instanced_Square = defs.Instanced_Square =
-  class Instanced_Square extends tiny.Shape {
-      // A truly minimal Square, with six vertices each holding a 3D position and a color.
-      constructor () {
-          super();
-          // Describe the where the points of a triangle are in space, and also describe their colors:
-          this.vertices[0] = { position: vec3 (-0.5, -0.5, 0), color: color (1, 0, 0, 1) };
-          this.vertices[1] = { position: vec3 (0.5, -0.5, 0), color: color (0, 1, 0, 1) };
-          this.vertices[2] = { position: vec3 (-0.5, 0.5, 0), color: color (0, 0, 1, 1) };
-          this.vertices[3] = { position: vec3 (0.5, -0.5, 0), color: color (0, 1, 0, 1) };
-          this.vertices[4] = { position: vec3 (-0.5, 0.5, 0), color: color (0, 0, 1, 1) };
-          this.vertices[5] = { position: vec3 (0.5, 0.5, 0), color: color (0, 1, 1, 1) };
-          this.num_vertices = this.vertices.length
-
-          this.fill_buffer( ["position", "color"] );
-
-          this.single_triangle = this.vertices;
-      }
-  };
-
-  const Instanced_Square_Index = defs.Instanced_Square_Index =
-  class Instanced_Square_Index extends tiny.Shape {
-      // A truly minimal Square, with six vertices each holding a 3D position and a color.
-      constructor () {
-          super();
-          // Describe the where the points of a triangle are in space, and also describe their colors:
-          this.vertices[0] = { position: vec3 (-0.5, -0.5, 0), color: color (1, 0, 0, 1) };
-          this.vertices[1] = { position: vec3 (0.5, -0.5, 0), color: color (0, 1, 0, 1) };
-          this.vertices[2] = { position: vec3 (-0.5, 0.5, 0), color: color (0, 0, 1, 1) };
-          this.vertices[3] = { position: vec3 (0.5, 0.5, 0), color: color (0, 1, 1, 1) };
-
-          this.indices = [0, 1, 2, 1, 2, 3];
-
-          this.fill_buffer( ["position", "color"] );
-
-          this.single_triangle = this.vertices;
-      }
-  };
-
-const Instanced_Cube_Index = defs.Instanced_Cube_Index =
-  class Instanced_Cube_Index extends tiny.Shape {
-      // A truly minimal Cube
-      constructor () {
-          super();
-          // Describe the where the points of a triangle are in space, and also describe their colors:
-          this.vertices[0] = { position: vec3 (-0.5, -0.5, -0.5), normal: vec3( 0.0, 0.0, -1.0), texture_coord: Vector.create (0.0, 0.0) }
-          this.vertices[1] = { position: vec3 (0.5, -0.5, -0.5),  normal: vec3(0.0, 0.0, -1.0 ), texture_coord: Vector.create (1.0, 0.0) }
-          this.vertices[2] = { position: vec3 (0.5,  0.5, -0.5),  normal: vec3(0.0, 0.0, -1.0 ), texture_coord: Vector.create ( 1.0, 1.0) }
-          this.vertices[3] = { position: vec3 (0.5,  0.5, -0.5),  normal: vec3(0.0, 0.0, -1.0 ), texture_coord: Vector.create ( 1.0, 1.0) }
-          this.vertices[4] = { position: vec3 (-0.5,  0.5, -0.5), normal: vec3( 0.0, 0.0, -1.0), texture_coord: Vector.create ( 0.0, 1.0) }
-          this.vertices[5] = { position: vec3 (-0.5, -0.5, -0.5), normal: vec3( 0.0, 0.0, -1.0), texture_coord: Vector.create ( 0.0, 0.0) }
-
-          this.vertices[6] = { position: vec3 (-0.5, -0.5,  0.5), normal: vec3( 0.0, 0.0, 1.0), texture_coord: Vector.create ( 0.0, 0.0) }
-          this.vertices[7] = { position: vec3 (0.5, -0.5,  0.5 ), normal: vec3( 0.0, 0.0, 1.0), texture_coord: Vector.create ( 1.0, 0.0) }
-          this.vertices[8] = { position: vec3 (0.5,  0.5,  0.5 ), normal: vec3( 0.0, 0.0, 1.0), texture_coord: Vector.create ( 1.0, 1.0) }
-          this.vertices[9] = { position: vec3 (0.5,  0.5,  0.5 ), normal: vec3( 0.0, 0.0, 1.0), texture_coord: Vector.create ( 1.0, 1.0) }
-          this.vertices[10] = { position: vec3 (-0.5,  0.5,  0.5), normal: vec3( 0.0, 0.0, 1.0), texture_coord: Vector.create ( 0.0, 1.0) }
-          this.vertices[11] = { position: vec3 (-0.5, -0.5,  0.5), normal: vec3( 0.0, 0.0, 1.0), texture_coord: Vector.create ( 0.0, 0.0) }
-
-          this.vertices[12] = { position: vec3 (-0.5,  0.5,  0.5), normal: vec3( -1.0, 0.0, 0.0), texture_coord: Vector.create ( 1.0, 0.0) }
-          this.vertices[13] = { position: vec3 (-0.5,  0.5, -0.5), normal: vec3( -1.0, 0.0, 0.0), texture_coord: Vector.create ( 1.0, 1.0) }
-          this.vertices[14] = { position: vec3 (-0.5, -0.5, -0.5), normal: vec3( -1.0, 0.0, 0.0), texture_coord: Vector.create ( 0.0, 1.0) }
-          this.vertices[15] = { position: vec3 (-0.5, -0.5, -0.5), normal: vec3( -1.0, 0.0, 0.0), texture_coord: Vector.create ( 0.0, 1.0) }
-          this.vertices[16] = { position: vec3 (-0.5, -0.5,  0.5), normal: vec3( -1.0, 0.0, 0.0), texture_coord: Vector.create ( 0.0, 0.0) }
-          this.vertices[17] = { position: vec3 (-0.5,  0.5,  0.5), normal: vec3( -1.0, 0.0, 0.0), texture_coord: Vector.create ( 1.0, 0.0) }
-
-          this.vertices[18] = { position: vec3 (0.5,  0.5,  0.5), normal: vec3( 1.0, 0.0, 0.0), texture_coord: Vector.create ( 1.0, 0.0) }
-          this.vertices[19] = { position: vec3 (0.5,  0.5, -0.5), normal: vec3( 1.0, 0.0, 0.0), texture_coord: Vector.create ( 1.0, 1.0) }
-          this.vertices[20] = { position: vec3 (0.5, -0.5, -0.5), normal: vec3( 1.0, 0.0, 0.0), texture_coord: Vector.create ( 0.0, 1.0) }
-          this.vertices[21] = { position: vec3 (0.5, -0.5, -0.5), normal: vec3( 1.0, 0.0, 0.0), texture_coord: Vector.create ( 0.0, 1.0) }
-          this.vertices[22] = { position: vec3 (0.5, -0.5,  0.5), normal: vec3( 1.0, 0.0, 0.0), texture_coord: Vector.create ( 0.0, 0.0) }
-          this.vertices[23] = { position: vec3 (0.5,  0.5,  0.5), normal: vec3( 1.0, 0.0, 0.0), texture_coord: Vector.create ( 1.0, 0.0) }
-
-          this.vertices[24] = { position: vec3 (-0.5, -0.5, -0.5), normal: vec3( 0.0, -1.0, 0.0), texture_coord: Vector.create ( 0.0, 1.0) }
-          this.vertices[25] = { position: vec3 (0.5, -0.5, -0.5),  normal: vec3(0.0, -1.0, 0.0 ), texture_coord: Vector.create (1.0, 1.0) }
-          this.vertices[26] = { position: vec3 (0.5, -0.5,  0.5),  normal: vec3(0.0, -1.0, 0.0 ), texture_coord: Vector.create (1.0, 0.0) }
-          this.vertices[27] = { position: vec3 (0.5, -0.5,  0.5),  normal: vec3(0.0, -1.0, 0.0 ), texture_coord: Vector.create (1.0, 0.0) }
-          this.vertices[28] = { position: vec3 (-0.5, -0.5,  0.5), normal: vec3( 0.0, -1.0, 0.0), texture_coord: Vector.create ( 0.0, 0.0) }
-          this.vertices[29] = { position: vec3 (-0.5, -0.5, -0.5), normal: vec3( 0.0, -1.0, 0.0), texture_coord: Vector.create ( 0.0, 1.0) }
-
-          this.vertices[30] = { position: vec3 (-0.5,  0.5, -0.5), normal: vec3( 0.0, 1.0, 0.0), texture_coord: Vector.create ( 0.0, 1.0) }
-          this.vertices[31] = { position: vec3 (0.5,  0.5, -0.5), normal: vec3( 0.0, 1.0, 0.0), texture_coord: Vector.create ( 1.0, 1.0) }
-          this.vertices[32] = { position: vec3 (0.5,  0.5,  0.5), normal: vec3( 0.0, 1.0, 0.0), texture_coord: Vector.create ( 1.0, 0.0) }
-          this.vertices[33] = { position: vec3 (0.5,  0.5,  0.5), normal: vec3( 0.0, 1.0, 0.0), texture_coord: Vector.create ( 1.0, 0.0) }
-          this.vertices[34] = { position: vec3 (-0.5,  0.5,  0.5), normal: vec3( 0.0, 1.0, 0.0), texture_coord: Vector.create ( 0.0, 0.0) }
-          this.vertices[35] = { position: vec3 (-0.5,  0.5, -0.5), normal: vec3( 0.0, 1.0, 0.0), texture_coord: Vector.create ( 0.0, 1.0) }
-
-          this.indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                          10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-                          20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-                          30, 31, 32, 33, 34, 35];
-
-          this.fill_buffer( ["position", "normal", "texture_coord"] );
-
-          this.single_cube = this.vertices;
-      }
-  };
-
 
 const Minimal_Shape = defs.Minimal_Shape =
   class Minimal_Shape extends tiny.Shape {
       // A truly minimal triangle, with three vertices each holding a 3D position and a color.
       constructor () {
-          super();
+          super ("position", "color");
           // Describe the where the points of a triangle are in space, and also describe their colors:
-          this.vertices[0] = { position: vec3 (0, 0, 0), color: color (1, 0, 0, 1) };
-          this.vertices[1] = { position: vec3 (1, 0, 0), color: color (0, 1, 0, 1) };
-          this.vertices[2] = { position: vec3 (0, 1, 0), color: color (0, 0, 1, 1) };
-
-          this.fill_buffer( ["position", "color"] );
-      }
-  };
-
-  const Minimaler_Shape = defs.Minimaler_Shape =
-  class Minimaler_Shape extends tiny.Shape {
-      constructor () {
-          super();
-          // Describe the where the points of a triangle are in space, and also describe their colors:
-          this.vertices[0] = { position: vec3 (0, 0, 0)};
-          this.vertices[1] = { position: vec3 (1, 0, 0)};
-          this.vertices[2] = { position: vec3 (0, 1, 0)};
-
-          this.fill_buffer( ["position"] );
-      }
-  };
-
-  const Shape_From_File = defs.Shape_From_File =
-  class Shape_From_File extends tiny.Shape
-  {                                   // **Shape_From_File** is a versatile standalone Shape that imports
-                                      // all its arrays' data from an .obj 3D model file.
-    constructor( filename, uses_3d_texture = false )
-      { super( "position", "normal", "texture_coord" );
-        this.ready = false;
-        //if uses_3d texture is false, means we are using 2d texture!
-        this.uses_3d_texture = uses_3d_texture;
-                                      // Begin downloading the mesh. Once that completes, return
-                                      // control to our parse_into_mesh function.
-        this.load_file( filename );
-      }
-    load_file( filename )
-        {                             // Request the external file and wait for it to load.
-          return fetch( filename )
-            .then( response =>
-              { if ( response.ok )  return Promise.resolve( response.text() )
-                else                return Promise.reject ( response.status )
-              })
-            .then( obj_file_contents => this.parse_into_mesh( obj_file_contents ) )
-            .catch( error => { throw "OBJ file loader:  OBJ file either not found or is of unsupported format." } )
-        }
-    parse_into_mesh( data )
-      {                           // Adapted from the "webgl-obj-loader.js" library found online:
-        var verts = [], vertNormals = [], textures = [], unpacked = {};
-
-        unpacked.verts = [];        unpacked.norms = [];    unpacked.textures = [];
-        unpacked.hashindices = {};  unpacked.indices = [];  unpacked.index = 0;
-
-        var lines = data.split('\n');
-
-        var VERTEX_RE = /^v\s/;    var NORMAL_RE = /^vn\s/;    var TEXTURE_RE = /^vt\s/;
-        var FACE_RE = /^f\s/;      var WHITESPACE_RE = /\s+/;
-
-        for (var i = 0; i < lines.length; i++) {
-          var line = lines[i].trim();
-          var elements = line.split(WHITESPACE_RE);
-          elements.shift();
-
-          if      (VERTEX_RE.test(line))   verts.push.apply(verts, elements);
-          else if (NORMAL_RE.test(line))   vertNormals.push.apply(vertNormals, elements);
-          else if (TEXTURE_RE.test(line)) {
-            if (this.uses_3d_texture)
-              textures.push.apply(textures, elements);
-            else //use 2d texture coordinates, even though texture coord can be 3d in obj file
-              textures.push.apply(textures, elements.slice(0,2));
-          }
-          else if (FACE_RE.test(line)) {
-            var quad = false;
-            for (var j = 0, eleLen = elements.length; j < eleLen; j++)
-            {
-                if(j === 3 && !quad) {  j = 2;  quad = true;  }
-                if(elements[j] in unpacked.hashindices)
-                    unpacked.indices.push(unpacked.hashindices[elements[j]]);
-                else
-                {
-                    var vertex = elements[ j ].split( '/' );
-
-                    unpacked.verts.push(+verts[(vertex[0] - 1) * 3 + 0]);
-                    unpacked.verts.push(+verts[(vertex[0] - 1) * 3 + 1]);
-                    unpacked.verts.push(+verts[(vertex[0] - 1) * 3 + 2]);
-
-                    if (textures.length)
-                    {
-                        if (this.uses_3d_texture) {
-                          unpacked.textures.push(+textures[(vertex[1] - 1) * 2 + 0]);
-                          unpacked.textures.push(+textures[(vertex[1] - 1) * 2 + 1]);
-                          unpacked.textures.push(+textures[(vertex[1] - 1) * 2 + 2]);
-                        }
-                        else {
-                          unpacked.textures.push(+textures[(vertex[1] - 1) * 2 + 0]);
-                          unpacked.textures.push(+textures[(vertex[1] - 1) * 2 + 1]);
-                        }
-                    }
-
-                    unpacked.norms.push(+vertNormals[(vertex[2] - 1) * 3 + 0]);
-                    unpacked.norms.push(+vertNormals[(vertex[2] - 1) * 3 + 1]);
-                    unpacked.norms.push(+vertNormals[(vertex[2] - 1) * 3 + 2]);
-
-                    unpacked.hashindices[elements[j]] = unpacked.index;
-                    unpacked.indices.push(unpacked.index);
-                    unpacked.index += 1;
-                }
-                if(j === 3 && quad)   unpacked.indices.push( unpacked.hashindices[elements[0]]);
-            }
-          }
-        }
-        {
-          const { verts, norms, textures } = unpacked;
-          var selection_of_attributes = [];
-
-          for( var j = 0; j < verts.length/3; j++ )
-              this.vertices[j] = {};
-
-          if (verts != [])
-          {
-            selection_of_attributes.push("position");
-            for( var j = 0; j < verts.length/3; j++ )
-              this.vertices[j].position = vec3( verts[ 3*j ], verts[ 3*j + 1 ], verts[ 3*j + 2 ] );
-          }
-
-          if (norms != [])
-          {
-            selection_of_attributes.push("normal");
-            for( var j = 0; j < norms.length/3; j++ )
-              this.vertices[j].normal = vec3( norms[ 3*j ], norms[ 3*j + 1 ], norms[ 3*j + 2 ] );
-          }
-
-          if (textures != [])
-          {
-            selection_of_attributes.push("texture_coord");
-            if (this.uses_3d_texture) {
-              for( var j = 0; j < textures.length/3; j++ )
-                this.vertices[j].texture_coord = vec3( textures[ 3*j ], textures[ 3*j + 1 ], textures[ 3*j + 2 ] );
-            }
-            else { //use 2d texture coordinates
-              for( var j = 0; j < textures.length/2; j++ )
-                this.vertices[j].texture_coord = vec( textures[ 2*j ], textures[ 2*j + 1 ] );
-            }
-          }
-
-          this.indices = unpacked.indices;
-        }
-
-        //this.normalize_positions( false );
-
-        //Deduce it from the obj data!
-        this.fill_buffer( selection_of_attributes );
-
-        this.ready = true;
-      }
-    draw( caller, uniforms, model_transform, material, type = "TRIANGLES", instances )
-      {               // draw(): Same as always for shapes, but cancel all
-                      // attempts to draw the shape before it loads:
-        if( this.ready )
-          super.draw( caller, uniforms, model_transform, material, type, instances );
+          this.arrays.position = [vec3 (0, 0, 0), vec3 (1, 0, 0), vec3 (0, 1, 0)];
+          this.arrays.color    = [color (1, 0, 0, 1), color (0, 1, 0, 1), color (0, 0, 1, 1)];
       }
   };

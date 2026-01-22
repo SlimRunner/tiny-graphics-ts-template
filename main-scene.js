@@ -13,52 +13,37 @@ import {Axes_Viewer, Axes_Viewer_Test_Scene, Matrix_Game}
                     from "./examples/axes-viewer.js";
 import {Demonstration}
                     from "./examples/demonstration.js";
-import {Fish_Demo}
-                    from "./examples/fish-demo.js";
 import {Inertia_Demo, Collision_Demo}
                     from "./examples/collisions-demo.js";
-import {Instanced_Cubes_Demo}
-                    from "./examples/instancing-demos.js";
 import {Many_Lights_Demo}
                     from "./examples/many-lights-demo.js";
 import {Obj_File_Demo}
                     from "./examples/obj-file-demo.js";
 import {Parametric_Surfaces}
                     from "./examples/parametric-surfaces.js";
-import {Particle_Demo}
-                    from "./examples/particle-demo.js";
 import {Scene_To_Texture_Demo}
                     from "./examples/scene-to-texture-demo.js";
-import {Shadows_Demo}
-                    from "./examples/shadows-demo.js";
 import {Text_Demo}
                     from "./examples/text-demo.js";
 import {Transforms_Sandbox_Base, Transforms_Sandbox}
                     from "./examples/transforms-sandbox.js";
-import {Demo}
-                    from "./my_code/main.js"
 
 Object.assign (defs,
                {Minimal_Webgl_Demo},
                {Axes_Viewer, Axes_Viewer_Test_Scene, Matrix_Game},
                {Demonstration},
-               {Fish_Demo},
                {Inertia_Demo, Collision_Demo},
-               {Instanced_Cubes_Demo},
                {Many_Lights_Demo},
                {Obj_File_Demo},
                {Parametric_Surfaces},
-               {Particle_Demo},
                {Scene_To_Texture_Demo},
-               {Shadows_Demo},
                {Text_Demo},
-               {Transforms_Sandbox_Base, Transforms_Sandbox},
-               {Demo},
+               {Transforms_Sandbox_Base, Transforms_Sandbox}
 );
 
 // ******************** SELECT THE DEMO TO DISPLAY:
 
-const main_scene        = Demo;
+const main_scene        = Demonstration;
 const additional_scenes = [];
 
 export {main_scene, additional_scenes, defs};

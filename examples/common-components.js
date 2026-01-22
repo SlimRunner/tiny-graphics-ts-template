@@ -1,33 +1,35 @@
 import {tiny} from '../tiny-graphics.js';
 // Pull these names into this module's scope for convenience:
-const {Vector, Vector3, vec, vec3, vec4, color, Matrix, Mat4, Shape, Shader, Component, Texture, UBO} = tiny;
-
-import {defs as shapes} from './common-shapes.js';
-import {defs as shaders} from './common-shaders.js';
+const {Vector, Vector3, vec, vec3, vec4, color, Matrix, Mat4, Shape, Shader, Component} = tiny;
 
 const defs = {};
+
 export {tiny, defs};
+
+const Minimal_Webgl_Demo = defs.Minimal_Webgl_Demo =
+  class Minimal_Webgl_Demo extends Component {
+      init () {
+          this.widget_options = {make_controls: false};    // This demo is too minimal to have controls
+          this.shapes         = {triangle: new Minimal_Shape ()};
+          this.shader         = new Basic_Shader ();
+      }
+      render_animation (caller) {
+          this.shapes.triangle.draw (caller, this.uniforms, Mat4.identity (), {shader: this.shader});
+      }
+  };
 
 const Movement_Controls = defs.Movement_Controls =
   class Movement_Controls extends Component {
-    constructor(props, update_callback = () => {})
-      {
-        super(props);
-        this.reset();
-        const defaults = {
-          roll                    : 0,
-          look_around_locked      : true,
-          thrust                  : vec3 (0, 0, 0),
-          pos                     : vec3 (0, 0, 0),
-          z_axis                  : vec3 (0, 0, 0),
-          radians_per_frame       : 1 / 200,
-          meters_per_frame        : 20,
-          speed_multiplier        : 1,
-          mouse_enabled_canvases  : new Set (),
-          will_take_over_uniforms : true,
-          };
-        Object.assign( this, defaults, { update_callback });
-      }
+      roll                    = 0;
+      look_around_locked      = true;
+      thrust                  = vec3 (0, 0, 0);
+      pos                     = vec3 (0, 0, 0);
+      z_axis                  = vec3 (0, 0, 0);
+      radians_per_frame       = 1 / 200;
+      meters_per_frame        = 20;
+      speed_multiplier        = 1;
+      mouse_enabled_canvases  = new Set ();
+      will_take_over_uniforms = true;
       set_recipient (matrix_closure, inverse_closure) {
           this.matrix  = matrix_closure;
           this.inverse = inverse_closure;
@@ -164,26 +166,22 @@ const Movement_Controls = defs.Movement_Controls =
           this.matrix ().post_multiply (Mat4.translation (0, 0, +25));
           this.inverse ().pre_multiply (Mat4.translation (0, 0, -25));
       }
-      render_animation (caller) {
+      render_animation (context) {
           const m  = this.speed_multiplier * this.meters_per_frame,
                 r  = this.speed_multiplier * this.radians_per_frame,
                 dt = this.uniforms.animation_delta_time / 1000;
 
           // TODO:  Once there is a way to test it, remove the below, because uniforms are no longer inaccessible
           // outside this function, so we could just tell this class to take over the uniforms' matrix anytime.
-                // if (this.will_take_over_uniforms) {
-                //     this.reset ();
-                //     this.will_take_over_uniforms = false;
-                // }
-
+          if (this.will_take_over_uniforms) {
+              this.reset ();
+              this.will_take_over_uniforms = false;
+          }
           // Move in first-person.  Scale the normal camera aiming speed by dt for smoothness:
           this.first_person_flyaround (dt * r, dt * m);
-          // Al so apply third-person "arcball" camera mode if a mouse drag is occurring:
+          // Also apply third-person "arcball" camera mode if a mouse drag is occurring:
           if (this.mouse.anchor)
               this.third_person_arcball (dt * r);
-
-          this.update_callback();
-
           // Log some values:
           this.pos    = this.inverse ().times (vec4 (0, 0, 0, 1));
           this.z_axis = this.inverse ().times (vec4 (0, 0, 1, 0));

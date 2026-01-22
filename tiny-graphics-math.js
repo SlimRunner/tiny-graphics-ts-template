@@ -45,11 +45,6 @@ const Vector3 = math.Vector3 =
           v[ 2 ]  = z;
           return v;
       }
-      set (x, y, z) {
-          this[ 0 ] = x;
-          this[ 1 ] = y;
-          this[ 2 ] = z;
-      }
       copy () { return Vector3.from (this); }
       // In-fix operations
       equals (b) { return this[ 0 ] === b[ 0 ] && this[ 1 ] === b[ 1 ] && this[ 2 ] === b[ 2 ]; }
@@ -80,9 +75,9 @@ const Vector3 = math.Vector3 =
       }
       // Other operations:
       randomized (s) {
-          return vec3 (this[ 0 ] + 2 * s * (Math.random () - .5),
-                       this[ 1 ] + 2 * s * (Math.random () - .5),
-                       this[ 2 ] + 2 * s * (Math.random () - .5));
+          return vec3 (this[ 0 ] + s * (Math.random () - .5),
+                       this[ 1 ] + s * (Math.random () - .5),
+                       this[ 2 ] + s * (Math.random () - .5));
       }
       mix (b, s) {
           return vec3 ((1 - s) * this[ 0 ] + s * b[ 0 ],
@@ -131,12 +126,6 @@ const Vector4 = math.Vector4 =
           v[ 2 ]  = z;
           v[ 3 ]  = w;
           return v;
-      }
-      set (x, y, z, w) {
-          this[ 0 ] = x;
-          this[ 1 ] = y;
-          this[ 2 ] = z;
-          this[ 3 ] = w;
       }
       copy () { return Vector4.from (this); }
       // In-fix operations:
@@ -217,7 +206,6 @@ const Vector4 = math.Vector4 =
 
 // See description at https://github.com/encyclopedia-of-code/tiny-graphics-js/wiki/tiny-graphics-math.js#shorthand
 const vec     = math.vec = Vector.create;
-const vec2    = math.vec = Vector.create;
 const vec3    = math.vec3 = Vector3.create;
 const vec4    = math.vec4 = Vector4.create;
 const unsafe3 = math.unsafe3 = Vector3.unsafe;
@@ -299,29 +287,7 @@ const Matrix = math.Matrix =
 const Mat4 = math.Mat4 =
   class Mat4 extends Matrix {
       // See description at https://github.com/encyclopedia-of-code/tiny-graphics-js/wiki/tiny-graphics-math.js#mat4
-      load_identity (target) {
-          for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) this[ i ][ j ] = i === j ? 1 : 0;
-      }
-      static identity () { return Matrix.of ([1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]); }
-      static rotate_vec3 (target, angle, x, y, z) {
-          const n         = Math.sqrt (x * x + y * y + z * z),
-                [i, j, k] = [x / n, y / n, z / n],
-                [c, s]    = [Math.cos (angle), Math.sin (angle)],
-                omc       = 1.0 - c;
-          const result_0  = (i * i * omc + c) * target[ 0 ] + (i * j * omc - k * s) * target[ 1 ] +
-                            (i * k * omc + j * s) * target[ 2 ];
-          const result_1  = (i * j * omc + k * s) * target[ 0 ] + (j * j * omc + c) * target[ 1 ] +
-                            (j * k * omc - i * s) * target[ 2 ];
-          const result_2  = (i * k * omc - j * s) * target[ 0 ] + (j * k * omc + i * s) * target[ 1 ] +
-                            (k * k * omc + c) * target[ 2 ];
-          target[0] = result_0;
-          target[1] = result_1;
-          target[2] = result_2;
-
-      }
-      load_rotation (target, angle, x, y, z) {
-
-      }
+      static identity () { return Matrix.of ([1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]); };
       static rotation (angle, x, y, z) {
           const normalize = (x, y, z) => {
               const n = Math.sqrt (x * x + y * y + z * z);
@@ -362,9 +328,9 @@ const Mat4 = math.Mat4 =
                      .times (Matrix.of (x.to4 (0), y.to4 (0), z.to4 (0), vec4 (0, 0, 0, 1)));
       }
       static orthographic (left, right, bottom, top, near, far) {
-          return Mat4.scale (1 / (right - left), 1 / (top - bottom), 1 / (far - near))
-                     .times (Mat4.translation (-left - right, -top - bottom, -near - far))
-                     .times (Mat4.scale (2, 2, -2));
+          return Mat4.scale(1 / (right - left), 1 / (top - bottom), 1 / (far - near))
+              .times(Mat4.translation(-left - right, -top - bottom, -near - far))
+              .times(Mat4.scale(2, 2, -2));
       }
       static perspective (fov_y, aspect, near, far) {
           const f = 1 / Math.tan (fov_y / 2), d = far - near;
