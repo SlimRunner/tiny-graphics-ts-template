@@ -2,37 +2,37 @@ export type Tuple<TItem, TLength extends number> = [TItem, ...TItem[]] & {
   length: TLength;
 };
 
-interface VectorArithmetic<VecT, N extends number> {
-  equals(b: VecT): boolean;
-  plus(b: VecT): Vector<N>;
-  minus(b: VecT): Vector<N>;
-  times(s: number): Vector<N>;
-  times_pairwise(b: VecT): Vector<N>;
-  scale_by(s: number): void;
-  dot(b: VecT): number;
-  randomized(s: number): Vector<N>;
-  mix(b: VecT, s: number): Vector<N>;
-  norm(): number;
-  normalized(): Vector<N>;
-  normalize(): Vector<N>;
-}
-
-interface VectorMutable<N extends number> {
-  add_by(b: VectorLike<N>): Vector<N> | Vector3 | Vector4;
-  subtract_by(b: VectorLike<N>): Vector<N> | Vector3 | Vector4;
-  scale_pairwise_by(b: VectorLike<N>): Vector<N> | Vector3 | Vector4;
-}
-
-interface VectorCrossable {
-  cross(b: VectorLike<3>): Vector3 | Vector<3>;
-}
-
-type VectorLikeProxy<VecT, N extends number> = Float32Array & {
-  readonly length: N;
-  [i: number]: number;
-} & VectorArithmetic<VecT, N>;
-
 export namespace math {
+  interface VectorArithmetic<VecT, N extends number> {
+    equals(b: VecT): boolean;
+    plus(b: VecT): Vector<N>;
+    minus(b: VecT): Vector<N>;
+    times(s: number): Vector<N>;
+    times_pairwise(b: VecT): Vector<N>;
+    scale_by(s: number): void;
+    dot(b: VecT): number;
+    randomized(s: number): Vector<N>;
+    mix(b: VecT, s: number): Vector<N>;
+    norm(): number;
+    normalized(): Vector<N>;
+    normalize(): Vector<N>;
+  }
+
+  interface VectorMutable<N extends number> {
+    add_by(b: VectorLike<N>): Vector<N> | Vector3 | Vector4;
+    subtract_by(b: VectorLike<N>): Vector<N> | Vector3 | Vector4;
+    scale_pairwise_by(b: VectorLike<N>): Vector<N> | Vector3 | Vector4;
+  }
+
+  interface VectorCrossable {
+    cross(b: VectorLike<3>): Vector3 | Vector<3>;
+  }
+
+  type VectorLikeProxy<VecT, N extends number> = Float32Array & {
+    readonly length: N;
+    [i: number]: number;
+  } & VectorArithmetic<VecT, N>;
+
   export abstract class VectorLike<N extends number>
     extends Float32Array
     implements VectorLikeProxy<VectorLike<N>, N>
@@ -100,7 +100,9 @@ export namespace math {
     to3(): Vector3;
   }
 
-  export type MatrixLike<R extends number, C extends number> = Array<Array<number>> & {
+  export type MatrixLike<R extends number, C extends number> = Array<
+    Array<number>
+  > & {
     readonly rows: R;
     readonly cols: C;
   };

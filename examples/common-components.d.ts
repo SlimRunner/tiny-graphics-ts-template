@@ -35,7 +35,7 @@ export namespace defs {
     reset(): void;
     add_mouse_controls(canvas: HTMLCanvasElement): void;
     render_explanation(
-      document_builder: Component,
+      document_builder: tiny.Component,
       document_element?: HTMLDivElement,
     ): void;
     render_controls(): void;
@@ -45,6 +45,6 @@ export namespace defs {
       leeway?: number,
     ): void;
     third_person_arcball(radians_per_frame: number): void;
-    render_animation(caller: Component): void;
+    render_animation(caller: tiny.Component): void;
   }
 }

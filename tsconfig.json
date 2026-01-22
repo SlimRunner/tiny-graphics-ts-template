@@ -21,7 +21,7 @@
     /* Ergonomics */
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
+    "skipLibCheck": false,
 
     /* Declarations */
     "typeRoots": [

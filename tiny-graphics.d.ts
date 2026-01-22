@@ -58,6 +58,11 @@ export interface ComponentLayoutOptions {
   [key: string]: any;
 }
 
+export type MaterialRecord = {
+  shader: tiny.Shader
+  texture?: tiny.Texture
+} & Record<string, unknown>;
+
 type Constructor<T> = abstract new (...args: any[]) => T;
 
 // ==============================================================
@@ -84,7 +89,7 @@ export namespace tiny {
       webgl_manager: Component,
       uniforms: Uniforms,
       model_transform: math.Mat4,
-      material: Material,
+      material: MaterialRecord,
       type?: keyof WebGL2RenderingContext,
     ): void;
     static insert_transformed_copy_into(
@@ -107,7 +112,7 @@ export namespace tiny {
       buffer_pointers: Record<string, WebGLBuffer>, // maybe same as ShapeArrayTypes?
       uniforms: Uniforms,
       model_transform: math.Mat4,
-      material: Material,
+      material: MaterialRecord,
     ): void;
     vertex_glsl_code(): string;
     fragment_glsl_code(): string;
@@ -192,8 +197,8 @@ export namespace tiny {
     render_layout(div: HTMLDivElement, options?: ComponentLayoutOptions): void;
     init(): void;
     render_animation(context: Component): void;
-    render_explanation(): void;
-    render_controls(): void;
+    render_explanation(...args: any[]): void;
+    render_controls(...args: any[]): void;
   }
 
   export const math: typeof MathNamespace;

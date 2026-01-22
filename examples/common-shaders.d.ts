@@ -1,27 +1,24 @@
 import {
   GPUAddresses,
+  MaterialRecord,
   tiny,
-  UBOBinding,
-  UBOBlockLayout,
   Uniforms,
 } from "../tiny-graphics";
 import { math } from "../tiny-graphics-math";
-import { defs } from "./common";
 
-interface LightSource {
+export interface LightSource {
   position: math.Vector4;
   color: math.Vector4;
   attenuation: number;
 }
 
-type FlatPhongMaterial = {
+export interface FlatPhongMaterial extends MaterialRecord {
   color: math.Vector4;
   ambient: number;
   diffusivity: number;
   specularity: number;
   smoothness: number;
-  texture?: tiny.Texture;
-};
+}
 
 export namespace defs {
   export class Basic_Shader extends tiny.Shader {}
@@ -41,7 +38,7 @@ export namespace defs {
     send_material(
       gl: WebGL2RenderingContext,
       gpu: GPUAddresses,
-      material: defs.Material | FlatPhongMaterial,
+      material: FlatPhongMaterial,
     ): void;
     send_uniforms(
       gl: WebGL2RenderingContext,
@@ -57,7 +54,7 @@ export namespace defs {
       gpu_addresses: GPUAddresses,
       uniforms: Uniforms,
       model_transform: math.Mat4,
-      material: defs.Material | FlatPhongMaterial,
+      material: FlatPhongMaterial,
     ): void;
   }
 
