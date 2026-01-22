@@ -24,51 +24,12 @@ type FlatPhongMaterial = {
 };
 
 export namespace defs {
-  export class Basicer_Shader extends tiny.Shader {}
-
   export class Basic_Shader extends tiny.Shader {}
 
-  export class Instanced_Shader extends tiny.Shader {
-    num_lights: number;
-    ubo_binding: UBOBinding;
-    ubo_layout: UBOBlockLayout;
-
-    constructor(num_lights?: number);
-
-    update_GPU(
-      context: WebGL2RenderingContext,
-      gpu_addresses: GPUAddresses,
-      uniforms: // NOTE: is this too much?
-        | Uniforms
-        | {
-            light_space_matrix?: math.Mat4;
-            lights?: LightSource[];
-          },
-      model_transform: math.Mat4,
-      material: defs.Material,
-    ): void;
-
-    static default_values(): {
-      color: math.Vector4;
-      ambient: number;
-      diffuse: math.Vector3;
-      specular: math.Vector3;
-      smoothness: number;
-    };
-  }
-
-  export class Textured_Instanced_Shader extends Instanced_Shader {}
-
-  export class Shadow_Pass_Shader extends tiny.Shader {}
-
-  export class Shadow_Instanced_Shader extends Instanced_Shader {}
-
-  export class Shadow_Textured_Instanced_Shader extends Instanced_Shader {}
+  export class Funny_Shader extends tiny.Shader {}
 
   export class Phong_Shader extends tiny.Shader {
     num_lights: number;
-    ubo_binding: UBOBinding;
-    ubo_layout: UBOBlockLayout;
 
     constructor(num_lights?: number);
 

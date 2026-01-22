@@ -70,12 +70,15 @@ export namespace widgets {
 
     constructor(component: tiny.Component, options?: WidgetOptions);
 
-    build_reader(
+    private build_reader(
       element: HTMLElement,
       main_scene: tiny.Component,
       definitions: TinyDefs,
     ): void;
-    build_navigator(element: HTMLElement, main_scene: tiny.Component): void;
+    private build_navigator(
+      element: HTMLElement,
+      main_scene: tiny.Component,
+    ): void;
     display_code(code_in_focus: tiny.Component): void;
     format_code(code_string: string): void;
   }
@@ -95,7 +98,7 @@ export namespace widgets {
     constructor(component: tiny.Component, options?: WidgetOptions);
 
     select_class(class_definition: tiny.Component): void;
-    fetch_handler(url: RequestInfo | URL, body: BodyInit): void;
+    fetch_handler(url: RequestInfo | URL, body: BodyInit): Promise<any>;
     submit_demo(): Promise<void>;
   }
 }

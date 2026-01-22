@@ -2,6 +2,11 @@ import { ComponentProps, tiny } from "../tiny-graphics";
 import { math } from "../tiny-graphics-math";
 
 export namespace defs {
+  export class Minimal_Webgl_Demo extends tiny.Component {
+    shapes: Record<string, tiny.Shape>;
+    shader: Record<string, tiny.Shader>;
+  }
+
   export class Movement_Controls extends tiny.Component {
     roll: number;
     look_around_locked: boolean;
@@ -17,13 +22,16 @@ export namespace defs {
       from_center: math.Vector<2>;
       anchor?: math.Vector<2>;
     };
-  
+
     matrix: () => math.Mat4;
     inverse: () => math.Mat4;
-  
+
     constructor(props: ComponentProps, update_callback: () => void);
-  
-    set_recipient(matrix_closure: () => math.Mat4, inverse_closure: () => math.Mat4): void;
+
+    set_recipient(
+      matrix_closure: () => math.Mat4,
+      inverse_closure: () => math.Mat4,
+    ): void;
     reset(): void;
     add_mouse_controls(canvas: HTMLCanvasElement): void;
     render_explanation(

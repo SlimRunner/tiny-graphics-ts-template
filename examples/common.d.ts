@@ -4,7 +4,7 @@ import type { defs as CompNamespace } from "./common-components";
 import { math } from "../tiny-graphics-math";
 import {
   GPUAddresses,
-  tiny,
+  tiny as TinyNamespace,
   UBOBlockLayout,
   UBOBuffer,
 } from "../tiny-graphics";
@@ -19,7 +19,7 @@ interface LightDefaultData {
   shadow_map_width: number;
   shadow_map_height: number;
   shadow_map_shader: ShaderNamespace.Shadow_Pass_Shader;
-  shadow_map: tiny.Shadow_Map[] | null;
+  shadow_map: TinyNamespace.Shadow_Map[] | null;
 }
 
 type MaterialData = {
@@ -31,138 +31,14 @@ type MaterialData = {
   [key: string]: UBOBuffer | undefined;
 };
 type MaterialSampler = {
-  diffuse_texture?: tiny.Texture;
-  normal_texture?: tiny.Texture;
-  specular_texture?: tiny.Texture;
-  [key: string]: tiny.Texture | undefined;
+  diffuse_texture?: TinyNamespace.Texture;
+  normal_texture?: TinyNamespace.Texture;
+  specular_texture?: TinyNamespace.Texture;
+  [key: string]: TinyNamespace.Texture | undefined;
 };
 
 export namespace defs {
-  export class Camera {
-    position: math.Vector3;
-    at: math.Vector3;
-    up: math.Vector3;
-    view: math.Mat4;
-    ubo_layout: UBOBlockLayout;
-    is_initialized: boolean;
-    proj?: math.Mat4;
-
-    constructor(
-      eye?: math.Vector3,
-      at?: math.Vector3,
-      up?: math.Vector3,
-      fov_y?: number,
-      aspect?: number,
-      near?: number,
-      far?: number,
-    );
-
-    initialize(caller: tiny.Component): void;
-  }
-
-  export class Light {
-    direction_or_position: math.Vector4;
-    color: math.Vector3;
-    diffuse: number;
-    specular: number;
-    attenuation_factor: number;
-    casts_shadow: boolean;
-    shadow_map_width: number;
-    shadow_map_height: number;
-    shadow_map_shader: ShaderNamespace.Shadow_Pass_Shader;
-    shadow_map: tiny.Shadow_Map[];
-
-    index: number;
-    ubo_layout: UBOBlockLayout;
-    light_space_matrix: [
-      math.Mat4,
-      math.Mat4,
-      math.Mat4,
-      math.Mat4,
-      math.Mat4,
-      math.Mat4,
-    ];
-    is_point_light: boolean;
-    is_initialized: boolean;
-
-    constructor(data: Partial<LightDefaultData>);
-
-    static default_values(): LightDefaultData;
-    initialize(caller: tiny.Component): void;
-    activate(gl: WebGL2RenderingContext, shadow_map_index: number): void;
-    deactivate(caller: tiny.Component, shadow_map_index: number): void;
-    bind(context: WebGL2RenderingContext, gpu_addresses: GPUAddresses): void;
-  }
-
-  export class Material {
-    name: string;
-    shader: tiny.Shader | undefined;
-    data: MaterialData;
-    samplers: MaterialSampler;
-    is_initialized: boolean;
-    ready: boolean;
-
-    constructor(
-      name?: string,
-      shader?: tiny.Shader,
-      data?: MaterialData,
-      samplers?: MaterialSampler,
-    );
-
-    initialize(gl: WebGL2RenderingContext, ubo_layout: UBOBlockLayout): void;
-    bind(binding_point: number): void;
-  }
-
-  export class Material_From_File {
-    arg_data: MaterialData;
-    arg_samplers: MaterialSampler;
-    ready: boolean;
-    readonly directory: string;
-    // no need to expose MTL
-    private MTL: any[];
-
-    constructor(
-      name?: string,
-      shader?: tiny.Shader,
-      filename?: string,
-      data?: MaterialData,
-      samplers?: MaterialSampler,
-    );
-
-    load_file(filename: string): Promise<void>;
-    parse_into_material(data: string): void;
-  }
-
-  export class Entity {
-    dirty: boolean;
-    shape: tiny.Shape;
-    global_transform: math.Mat4;
-    transforms: math.Mat4[] | math.Mat4;
-    material: Material;
-
-    constructor(shape: tiny.Shape, transforms: math.Mat4[] | math.Mat4, material: Material);
-
-    set_shape(shape: tiny.Shape): void;
-    set_transforms(transforms: math.Mat4[] | math.Mat4): void;
-    apply_transform(model_transform: math.Mat4): void;
-    set_material(material: Material): void;
-  }
-
-  export class Renderer {
-    entities: Entity[];
-    lights: Light[];
-
-    constructor();
-
-    submit(object: Entity): void;
-    shadow_map_pass(caller: WebGL2RenderingContext, lights: Light[]): void;
-    flush(
-      caller: tiny.Component,
-      lights?: Light[],
-      clear_entities?: boolean,
-      alternative_shader?: tiny.Shader,
-    ): void;
-  }
+  // current common is empty
 
   export import Basic_Shader = ShaderNamespace.Basic_Shader;
   export import Basicer_Shader = ShaderNamespace.Basicer_Shader;
@@ -203,3 +79,5 @@ export namespace defs {
 
   export import Movement_Controls = CompNamespace.Movement_Controls;
 }
+
+export const tiny: typeof TinyNamespace;

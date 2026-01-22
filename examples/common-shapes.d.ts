@@ -58,7 +58,6 @@ export namespace defs {
       texture_coord_range: TextureRange,
       total_curvature_angle?: number,
     );
-    static sample_array(array: any[], ratio: number): any;
   }
 
   export class Regular_2D_Polygon extends Surface_Of_Revolution {
@@ -103,55 +102,26 @@ export namespace defs {
     drawOneAxis(transform: math.Mat4, tex: TextureRange): void;
   }
 
-  export class Instanced_Shape extends tiny.Shape {
-    single_triangle: ShapeVertex[];
-
-    constructor();
-  }
-
-  export class Instanced_Square extends tiny.Shape {
-    // wtf? a copy-paste mistake
-    single_triangle: ShapeVertex[];
-
-    constructor();
-  }
-
-  export class Instanced_Square_Index extends tiny.Shape {
-    // wtf? a copy-paste mistake
-    single_triangle: ShapeVertex[];
-
-    constructor();
-  }
-
-  export class Instanced_Cube_Index extends tiny.Shape {
-    single_cube: ShapeVertex[];
-
-    constructor();
-  }
-
   export class Minimal_Shape extends tiny.Shape {
     constructor();
   }
 
-  export class Minimaler_Shape extends tiny.Shape {
-    constructor();
-  }
+  // TODO: backport code for this from assignment 0
+  // export class Shape_From_File extends tiny.Shape {
+  //   ready: boolean;
+  //   uses_3d_texture: boolean;
 
-  export class Shape_From_File extends tiny.Shape {
-    ready: boolean;
-    uses_3d_texture: boolean;
+  //   constructor(filename: string, uses_3d_texture?: boolean);
 
-    constructor(filename: string, uses_3d_texture?: boolean);
-
-    load_file(filename: string): Promise<void>;
-    parse_into_mesh(data: string): void;
-    draw(
-      caller: tiny.Component, // renamed from base
-      uniforms: Uniforms,
-      model_transform: math.Mat4,
-      material: defs.Material,
-      type?: keyof WebGL2RenderingContext,
-      instances?: GLsizei,
-    ): void;
-  }
+  //   load_file(filename: string): Promise<void>;
+  //   parse_into_mesh(data: string): void;
+  //   draw(
+  //     caller: tiny.Component, // renamed from base
+  //     uniforms: Uniforms,
+  //     model_transform: math.Mat4,
+  //     material: defs.Material,
+  //     type?: keyof WebGL2RenderingContext,
+  //     instances?: GLsizei,
+  //   ): void;
+  // }
 }

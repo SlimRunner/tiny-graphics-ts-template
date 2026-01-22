@@ -70,7 +70,7 @@ export namespace math {
   {
     static create(...arr: Tuple<number, 3>): Vector3;
     copy(): Vector3;
-    static cast(...args: Tuple<number, 3>[]): VectorLike<3>[];
+    static cast(...args: Tuple<number, 3>[]): Vector3[];
 
     add_by(b: VectorLike<3>): Vector3;
     subtract_by(b: VectorLike<3>): Vector3;
@@ -86,9 +86,9 @@ export namespace math {
   type UnsafeVec4 = Vector4 & { __unsafe: true };
 
   export class Vector4 extends VectorLike<4> implements VectorMutable<4> {
-    static create(...arr: Tuple<number, 4>): VectorLike<4>;
+    static create(...arr: Tuple<number, 4>): Vector4;
     copy(): VectorLike<4>;
-    static cast(...args: Tuple<number, 4>[]): VectorLike<4>[];
+    static cast(...args: Tuple<number, 4>[]): Vector4[];
 
     add_by(b: VectorLike<4>): Vector4;
     subtract_by(b: VectorLike<4>): Vector4;
@@ -142,15 +142,7 @@ export namespace math {
   }
 
   export class Mat4 extends Matrix<4, 4> {
-    load_identity(target: never): Mat4;
     static identity(): Mat4;
-    static rotate_vec3(
-      target: VectorLike<3>,
-      angle: number,
-      x: number,
-      y: number,
-      z: number,
-    ): void;
     static rotation(angle: number, x: number, y: number, z: number): Mat4;
     static scale(x: number, y: number, z: number): Mat4;
     static translation(x: number, y: number, z: number): Mat4;
