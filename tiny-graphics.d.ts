@@ -144,8 +144,8 @@ export namespace tiny {
     key_controls: widgets.Keyboard_Manager;
     canvas: HTMLCanvasElement;
     context?: WebGL2RenderingContext;
-    width?: number;
-    height?: number;
+    width: number; // these can technically be undefined but that is a pain in the ass
+    height: number; // these can technically be undefined but that is a pain in the ass
 
     control_panel?: HTMLDivElement;
     div: HTMLDivElement;
