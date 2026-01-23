@@ -146,6 +146,7 @@ export namespace tiny {
     context?: WebGL2RenderingContext;
     width: number; // these can technically be undefined but that is a pain in the ass
     height: number; // these can technically be undefined but that is a pain in the ass
+    controls?: Component; // to appease the mixins
 
     control_panel?: HTMLDivElement;
     div: HTMLDivElement;
