@@ -6,7 +6,8 @@ export type ShapeArrayKeys = "position" | "tangents" | "normal" | (string & {});
 export type ShapeArrayTypes = {
   position?: math.Vector3[];
   tangents?: math.Vector3[];
-  normal?: math.Vector<2>[];
+  normal?: math.Vector3[];
+  texture_coord?: math.Vector<2>[];
   [key: string]: any;
 };
 
@@ -59,8 +60,8 @@ export interface ComponentLayoutOptions {
 }
 
 export type MaterialRecord = {
-  shader?: tiny.Shader
-  texture?: tiny.Texture
+  shader?: tiny.Shader;
+  texture?: tiny.Texture;
 } & Record<string, unknown>;
 
 type Constructor<T> = abstract new (...args: any[]) => T;
