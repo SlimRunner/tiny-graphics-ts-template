@@ -11,7 +11,7 @@ export namespace math {
     times_pairwise(b: VecT): Vector<N>;
     scale_by(s: number): void;
     dot(b: VecT): number;
-    randomized(s: number): Vector<N>;
+    randomized(s: number): void;
     mix(b: VecT, s: number): Vector<N>;
     norm(): number;
     normalized(): Vector<N>;
@@ -19,9 +19,9 @@ export namespace math {
   }
 
   interface VectorMutable<N extends number> {
-    add_by(b: VectorLike<N>): Vector<N> | Vector3 | Vector4;
-    subtract_by(b: VectorLike<N>): Vector<N> | Vector3 | Vector4;
-    scale_pairwise_by(b: VectorLike<N>): Vector<N> | Vector3 | Vector4;
+    add_by(b: VectorLike<N>): void;
+    subtract_by(b: VectorLike<N>): void;
+    scale_pairwise_by(b: VectorLike<N>): void;
   }
 
   interface VectorCrossable {
@@ -45,7 +45,7 @@ export namespace math {
     times_pairwise(b: VectorLike<N>): Vector<N>;
     scale_by(s: number): void;
     dot(b: VectorLike<N>): number;
-    randomized(s: number): Vector<N>;
+    randomized(s: number): void;
     mix(b: VectorLike<N>, s: number): Vector<N>;
     norm(): number;
     normalized(): Vector<N>;
@@ -72,9 +72,9 @@ export namespace math {
     copy(): Vector3;
     static cast(...args: Tuple<number, 3>[]): Vector3[];
 
-    add_by(b: VectorLike<3>): Vector3;
-    subtract_by(b: VectorLike<3>): Vector3;
-    scale_pairwise_by(b: VectorLike<3>): Vector3;
+    add_by(b: VectorLike<3>): void;
+    subtract_by(b: VectorLike<3>): void;
+    scale_pairwise_by(b: VectorLike<3>): void;
     cross(b: VectorLike<3>): Vector3;
 
     static shared_memory: UnsafeVec3;
@@ -90,9 +90,9 @@ export namespace math {
     copy(): VectorLike<4>;
     static cast(...args: Tuple<number, 4>[]): Vector4[];
 
-    add_by(b: VectorLike<4>): Vector4;
-    subtract_by(b: VectorLike<4>): Vector4;
-    scale_pairwise_by(b: VectorLike<4>): Vector4;
+    add_by(b: VectorLike<4>): void;
+    subtract_by(b: VectorLike<4>): void;
+    scale_pairwise_by(b: VectorLike<4>): void;
 
     static shared_memory: UnsafeVec4;
     static unsafe(x: number, y: number, z: number, w: number): UnsafeVec4;
