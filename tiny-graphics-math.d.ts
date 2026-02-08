@@ -114,7 +114,7 @@ export namespace math {
     declare readonly rows: R;
     declare readonly cols: C;
 
-    constructor(args: Tuple<Tuple<number, C>, R> | Matrix<R, C>);
+    constructor(...args: Tuple<Tuple<number, C>, R>);
     set(M: MatrixLike<R, C>): void;
     set_identity(n: R, m: C): Matrix<R, C>;
     sub_block<R2 extends number, C2 extends number>(
