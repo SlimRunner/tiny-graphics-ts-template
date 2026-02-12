@@ -15,7 +15,7 @@ npm run dev
 
 ## Usage
 
-Make sure you import using `.js` at the end because this project does not use a bundler, so it will not translate `import { tiny } from "../tiny-graphics";` to `import { tiny } from "../tiny-graphics.js";` for you. This also include pure TS libraries you may add. That is use `.js` instead of `.ts`. Correct address are resolved simply because `src` and `my_code` both share the same relative position to the root. Hence the "enforced" structure is
+Make sure that you **import only using relative paths for all files w/o extension** that includes within and outside the `src` directory. The reason for this is that this project does not use a bundler to preserve the directory structure, so it relies on a script to parse the paths and add the `.js` extension. Correct address are resolved simply because `src` and `my_code` both share the same relative position to the root. Hence the "enforced" structure is
 ```
 📁 root
 ├─🔹 ... other files/directories
@@ -27,6 +27,37 @@ Make sure you import using `.js` at the end because this project does not use a 
 ```
 
 Other than that code as you would normally, and use the types as guide.
+
+## List of Modified Files
+This is the list of files you need to copy if you want to implement TS into your project
+```
+./.gitignore
+./examples/common-components.d.ts
+./examples/common-shaders.d.ts
+./examples/common-shapes.d.ts
+./examples/common.d.ts
+./host.sh
+./jest.config.js
+./nodemon.json
+./package.json
+./resolve-imports.js
+./tests
+./tiny-graphics-gui.d.ts
+./tiny-graphics-math.d.ts
+./tiny-graphics.d.ts
+./tsconfig.json
+```
+
+Alternatively, you might want to ensure these files match as well since it is the version the declaration files are based on
+```
+./examples/common-components.js
+./examples/common-shaders.js
+./examples/common-shapes.js
+./examples/common.js
+./tiny-graphics-gui.js
+./tiny-graphics-math.js
+./tiny-graphics.js
+```
 
 ## About tiny-graphics.js
 
