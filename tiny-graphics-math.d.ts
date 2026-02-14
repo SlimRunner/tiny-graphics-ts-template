@@ -3,105 +3,179 @@ export type Tuple<TItem, TLength extends number> = [TItem, ...TItem[]] & {
 };
 
 export namespace math {
-  interface VectorArithmetic<VecT, N extends number> {
-    equals(b: VecT): boolean;
-    plus(b: VecT): Vector<N>;
-    minus(b: VecT): Vector<N>;
-    times(s: number): Vector<N>;
-    times_pairwise(b: VecT): Vector<N>;
-    scale_by(s: number): void;
-    dot(b: VecT): number;
-    randomized(s: number): void;
-    mix(b: VecT, s: number): Vector<N>;
+  export class Vector<N extends Number> extends Float32Array {
+    static create<M extends number>(...arr: Tuple<number, M>): Vector<M>;
+    static cast<M extends number>(...args: Tuple<number, M>[]): Vector<M>[];
+    copy(): Vector<N>;
+
+    equals(b: Vector<N>): boolean;
+    equals(b: Vector3): boolean;
+    equals(b: any): boolean;
+
+    plus(b: Vector<N>): Vector<N>;
+    plus(b: Vector3): Vector<N>;
+    plus(b: any): Vector<N>;
+
+    minus(b: Vector<N>): Vector<N>;
+    minus(b: Vector3): Vector<N>;
+    minus(b: any): Vector<N>;
+
+    times_pairwise(b: Vector<N>): Vector<N>;
+    times_pairwise(b: Vector3): Vector<N>;
+    times_pairwise(b: any): Vector<N>;
+
+    times(b: number): Vector<N>;
+    scale_by(b: number): void;
+    randomized(b: number): void;
+
+    mix(b: Vector<N>, s: number): Vector<N>;
+    mix(b: Vector3, s: number): Vector<N>;
+    mix(b: any, s: number): Vector<N>;
+
     norm(): number;
     normalized(): Vector<N>;
-    normalize(): Vector<N>;
-  }
+    normalize(): void;
 
-  interface VectorMutable<N extends number> {
-    add_by(b: VectorLike<N>): void;
-    subtract_by(b: VectorLike<N>): void;
-    scale_pairwise_by(b: VectorLike<N>): void;
-  }
+    dot(b: Vector<N>): number;
+    dot(b: Vector3): number;
+    dot(b: any): number;
 
-  interface VectorCrossable {
-    cross(b: VectorLike<3>): Vector3 | Vector<3>;
-  }
+    to3(): Vector3;
+    to4(): Vector4;
 
-  type VectorLikeProxy<VecT, N extends number> = Float32Array & {
-    readonly length: N;
-    [i: number]: number;
-  } & VectorArithmetic<VecT, N>;
-
-  export abstract class VectorLike<N extends number>
-    extends Float32Array
-    implements VectorLikeProxy<VectorLike<N>, N>
-  {
-    declare readonly length: N;
-    equals(b: VectorLike<N>): boolean;
-    plus(b: VectorLike<N>): Vector<N>;
-    minus(b: VectorLike<N>): Vector<N>;
-    times(s: number): Vector<N>;
-    times_pairwise(b: VectorLike<N>): Vector<N>;
-    scale_by(s: number): void;
-    dot(b: VectorLike<N>): number;
-    randomized(s: number): void;
-    mix(b: VectorLike<N>, s: number): Vector<N>;
-    norm(): number;
-    normalized(): Vector<N>;
-    normalize(): Vector<N>;
-    // structurally wrong, but correct modeling of tiny-graphics
-    cross(b: VectorLike<3>): Vector3;
+    cross(b: Vector<N>): Vector<N>;
+    cross(b: any): Vector<N>;
 
     to_string(): string;
   }
 
-  export class Vector<N extends number> extends VectorLike<N> {
-    static create<M extends number>(...arr: Tuple<number, M>): VectorLike<M>;
-    copy(): VectorLike<N>;
-    static cast<M extends number>(...args: Tuple<number, M>[]): VectorLike<M>[];
-    to3(): Vector3;
-    to4(): Vector4;
-  }
-
-  type UnsafeVec3 = Vector3 & { __unsafe: true };
-
-  export class Vector3
-    extends VectorLike<3>
-    implements VectorMutable<3>, VectorCrossable
-  {
+  export class Vector3 extends Float32Array {
     static create(...arr: Tuple<number, 3>): Vector3;
-    copy(): Vector3;
     static cast(...args: Tuple<number, 3>[]): Vector3[];
+    copy(): Vector3;
 
-    add_by(b: VectorLike<3>): void;
-    subtract_by(b: VectorLike<3>): void;
-    scale_pairwise_by(b: VectorLike<3>): void;
-    // removed to model tiny-graphics faithfully
-    // cross(b: VectorLike<3>): Vector3;
+    equals(b: Vector<3>): boolean;
+    equals(b: Vector3): boolean;
+    equals(b: any): boolean;
+
+    plus(b: Vector<3>): Vector3;
+    plus(b: Vector3): Vector3;
+    plus(b: any): Vector3;
+
+    minus(b: Vector<3>): Vector3;
+    minus(b: Vector3): Vector3;
+    minus(b: any): Vector3;
+
+    times_pairwise(b: Vector<3>): Vector3;
+    times_pairwise(b: Vector3): Vector3;
+    times_pairwise(b: any): Vector3;
+
+    times(b: number): Vector3;
+
+    add_by(b: Vector<3>): void;
+    add_by(b: Vector3): void;
+    add_by(b: any): void;
+
+    subtract_by(b: Vector<3>): void;
+    subtract_by(b: Vector3): void;
+    subtract_by(b: any): void;
+
+    scale_by(s: Vector<3>): void;
+    scale_by(s: Vector3): void;
+    scale_by(s: any): void;
+
+    scale_pairwise_by(b: Vector<3>): void;
+    scale_pairwise_by(b: Vector3): void;
+    scale_pairwise_by(b: any): void;
+
+    randomized(s: number): Vector3;
+
+    mix(b: Vector<3>, s: number): Vector3;
+    mix(b: Vector3, s: number): Vector3;
+    mix(b: any, s: number): Vector3;
+
+    norm(): number;
+    normalized(): Vector3;
+    normalize(): void;
+
+    dot(b: Vector<3>): number;
+    dot(b: Vector3): number;
+    dot(b: any): number;
+
+    cross(b: Vector<3>): Vector3;
+    cross(b: Vector3): Vector3;
+    cross(b: any): Vector3;
 
     static shared_memory: UnsafeVec3;
     static unsafe(x: number, y: number, z: number): UnsafeVec3;
 
-    to4(): Vector4;
+    to4(is_a_point: 0 | 1): Vector4;
+    to_string(): string;
   }
 
-  type UnsafeVec4 = Vector4 & { __unsafe: true };
+  type UnsafeVec3 = Vector3 & { __unsafe: true };
 
-  export class Vector4 extends VectorLike<4> implements VectorMutable<4> {
+  export class Vector4 extends Float32Array {
     static create(...arr: Tuple<number, 4>): Vector4;
-    copy(): VectorLike<4>;
     static cast(...args: Tuple<number, 4>[]): Vector4[];
+    copy(): Vector4;
 
-    add_by(b: VectorLike<4>): void;
-    subtract_by(b: VectorLike<4>): void;
-    scale_pairwise_by(b: VectorLike<4>): void;
+    equals(b: Vector<4>): boolean;
+    equals(b: Vector4): boolean;
+    equals(b: any): boolean;
+
+    plus(b: Vector<4>): Vector4;
+    plus(b: Vector4): Vector4;
+    plus(b: any): Vector4;
+
+    minus(b: Vector<4>): Vector4;
+    minus(b: Vector4): Vector4;
+    minus(b: any): Vector4;
+
+    times_pairwise(b: Vector<4>): Vector4;
+    times_pairwise(b: Vector4): Vector4;
+    times_pairwise(b: any): Vector4;
+
+    times(b: number): Vector4;
+
+    add_by(b: Vector<4>): void;
+    add_by(b: Vector4): void;
+    add_by(b: any): void;
+
+    subtract_by(b: Vector<4>): void;
+    subtract_by(b: Vector4): void;
+    subtract_by(b: any): void;
+
+    scale_by(s: Vector<4>): void;
+    scale_by(s: Vector4): void;
+    scale_by(s: any): void;
+
+    scale_pairwise_by(b: Vector<4>): void;
+    scale_pairwise_by(b: Vector4): void;
+    scale_pairwise_by(b: any): void;
+
+    randomized(s: number): Vector4;
+
+    mix(b: Vector<4>, s: number): Vector4;
+    mix(b: Vector4, s: number): Vector4;
+    mix(b: any, s: number): Vector4;
+
+    norm(): number;
+    normalized(): Vector4;
+    normalize(): void;
+
+    dot(b: Vector<4>): number;
+    dot(b: Vector4): number;
+    dot(b: any): number;
 
     static shared_memory: UnsafeVec4;
     static unsafe(x: number, y: number, z: number, w: number): UnsafeVec4;
 
     to3(): Vector3;
+    to_string(): string;
   }
+
+  type UnsafeVec4 = Vector4 & { __unsafe: true };
 
   export type MatrixLike<R extends number, C extends number> = Array<
     Array<number>
@@ -152,9 +226,9 @@ export namespace math {
     static scale(x: number, y: number, z: number): Mat4;
     static translation(x: number, y: number, z: number): Mat4;
     static look_at(
-      eye: VectorLike<3>,
-      at: VectorLike<3>,
-      up: VectorLike<3>,
+      eye: Vector3 | Vector<3>,
+      at: Vector3 | Vector<3>,
+      up: Vector3 | Vector<3>,
     ): Mat4;
     static orthographic(
       left: number,
