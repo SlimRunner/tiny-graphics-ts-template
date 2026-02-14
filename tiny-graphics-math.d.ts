@@ -50,6 +50,8 @@ export namespace math {
     norm(): number;
     normalized(): Vector<N>;
     normalize(): Vector<N>;
+    // structurally wrong, but correct modeling of tiny-graphics
+    cross(b: VectorLike<3>): Vector3;
 
     to_string(): string;
   }
@@ -75,7 +77,8 @@ export namespace math {
     add_by(b: VectorLike<3>): void;
     subtract_by(b: VectorLike<3>): void;
     scale_pairwise_by(b: VectorLike<3>): void;
-    cross(b: VectorLike<3>): Vector3;
+    // removed to model tiny-graphics faithfully
+    // cross(b: VectorLike<3>): Vector3;
 
     static shared_memory: UnsafeVec3;
     static unsafe(x: number, y: number, z: number): UnsafeVec3;
