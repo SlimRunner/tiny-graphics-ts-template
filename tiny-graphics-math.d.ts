@@ -45,7 +45,7 @@ export namespace math {
 
     add_by(b: Vector<3> | Vector3): void;
     subtract_by(b: Vector<3> | Vector3): void;
-    scale_by(s: Vector<3> | Vector3): void;
+    scale_by(s: number): void;
     scale_pairwise_by(b: Vector<3> | Vector3): void;
     normalize(): void;
 
@@ -78,7 +78,7 @@ export namespace math {
 
     add_by(b: Vector<4> | Vector4): void;
     subtract_by(b: Vector<4> | Vector4): void;
-    scale_by(s: Vector<4> | Vector4): void;
+    scale_by(s: number): void;
     scale_pairwise_by(b: Vector<4> | Vector4): void;
     normalize(): void;
 
