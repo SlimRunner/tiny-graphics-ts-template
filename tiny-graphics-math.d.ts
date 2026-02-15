@@ -8,43 +8,24 @@ export namespace math {
     static cast<M extends number>(...args: Tuple<number, M>[]): Vector<M>[];
     copy(): Vector<N>;
 
-    equals(b: Vector<N>): boolean;
-    equals(b: Vector3): boolean;
-    equals(b: any): boolean;
-
-    plus(b: Vector<N>): Vector<N>;
-    plus(b: Vector3): Vector<N>;
-    plus(b: any): Vector<N>;
-
-    minus(b: Vector<N>): Vector<N>;
-    minus(b: Vector3): Vector<N>;
-    minus(b: any): Vector<N>;
-
-    times_pairwise(b: Vector<N>): Vector<N>;
-    times_pairwise(b: Vector3): Vector<N>;
-    times_pairwise(b: any): Vector<N>;
-
+    equals(b: Vector<N> | Vector3 | Vector4): boolean;
+    plus(b: Vector<N> | Vector3 | Vector4): Vector<N>;
+    minus(b: Vector<N> | Vector3 | Vector4): Vector<N>;
+    times_pairwise(b: Vector<N> | Vector3 | Vector4): Vector<N>;
     times(b: number): Vector<N>;
     scale_by(b: number): void;
     randomized(b: number): void;
+    mix(b: Vector<N> | Vector3 | Vector4, s: number): Vector<N>;
 
-    mix(b: Vector<N>, s: number): Vector<N>;
-    mix(b: Vector3, s: number): Vector<N>;
-    mix(b: any, s: number): Vector<N>;
+    normalize(): void;
 
     norm(): number;
     normalized(): Vector<N>;
-    normalize(): void;
-
-    dot(b: Vector<N>): number;
-    dot(b: Vector3): number;
-    dot(b: any): number;
+    dot(b: Vector<N> | Vector3 | Vector4): number;
+    cross(b: Vector<N> | Vector3): Vector<3>;
 
     to3(): Vector3;
     to4(): Vector4;
-
-    cross(b: Vector<N>): Vector<N>;
-    cross(b: any): Vector<N>;
 
     to_string(): string;
   }
@@ -54,57 +35,24 @@ export namespace math {
     static cast(...args: Tuple<number, 3>[]): Vector3[];
     copy(): Vector3;
 
-    equals(b: Vector<3>): boolean;
-    equals(b: Vector3): boolean;
-    equals(b: any): boolean;
-
-    plus(b: Vector<3>): Vector3;
-    plus(b: Vector3): Vector3;
-    plus(b: any): Vector3;
-
-    minus(b: Vector<3>): Vector3;
-    minus(b: Vector3): Vector3;
-    minus(b: any): Vector3;
-
-    times_pairwise(b: Vector<3>): Vector3;
-    times_pairwise(b: Vector3): Vector3;
-    times_pairwise(b: any): Vector3;
-
+    equals(b: Vector<3> | Vector3): boolean;
+    plus(b: Vector<3> | Vector3): Vector3;
+    minus(b: Vector<3> | Vector3): Vector3;
+    times_pairwise(b: Vector<3> | Vector3): Vector3;
     times(b: number): Vector3;
-
-    add_by(b: Vector<3>): void;
-    add_by(b: Vector3): void;
-    add_by(b: any): void;
-
-    subtract_by(b: Vector<3>): void;
-    subtract_by(b: Vector3): void;
-    subtract_by(b: any): void;
-
-    scale_by(s: Vector<3>): void;
-    scale_by(s: Vector3): void;
-    scale_by(s: any): void;
-
-    scale_pairwise_by(b: Vector<3>): void;
-    scale_pairwise_by(b: Vector3): void;
-    scale_pairwise_by(b: any): void;
-
     randomized(s: number): Vector3;
+    mix(b: Vector<3> | Vector3, s: number): Vector3;
 
-    mix(b: Vector<3>, s: number): Vector3;
-    mix(b: Vector3, s: number): Vector3;
-    mix(b: any, s: number): Vector3;
+    add_by(b: Vector<3> | Vector3): void;
+    subtract_by(b: Vector<3> | Vector3): void;
+    scale_by(s: Vector<3> | Vector3): void;
+    scale_pairwise_by(b: Vector<3> | Vector3): void;
+    normalize(): void;
 
     norm(): number;
     normalized(): Vector3;
-    normalize(): void;
-
-    dot(b: Vector<3>): number;
-    dot(b: Vector3): number;
-    dot(b: any): number;
-
-    cross(b: Vector<3>): Vector3;
-    cross(b: Vector3): Vector3;
-    cross(b: any): Vector3;
+    dot(b: Vector<3> | Vector3): number;
+    cross(b: Vector<3> | Vector3): Vector3;
 
     static shared_memory: UnsafeVec3;
     static unsafe(x: number, y: number, z: number): UnsafeVec3;
@@ -120,53 +68,23 @@ export namespace math {
     static cast(...args: Tuple<number, 4>[]): Vector4[];
     copy(): Vector4;
 
-    equals(b: Vector<4>): boolean;
-    equals(b: Vector4): boolean;
-    equals(b: any): boolean;
-
-    plus(b: Vector<4>): Vector4;
-    plus(b: Vector4): Vector4;
-    plus(b: any): Vector4;
-
-    minus(b: Vector<4>): Vector4;
-    minus(b: Vector4): Vector4;
-    minus(b: any): Vector4;
-
-    times_pairwise(b: Vector<4>): Vector4;
-    times_pairwise(b: Vector4): Vector4;
-    times_pairwise(b: any): Vector4;
-
+    equals(b: Vector<4> | Vector4): boolean;
+    plus(b: Vector<4> | Vector4): Vector4;
+    minus(b: Vector<4> | Vector4): Vector4;
+    times_pairwise(b: Vector<4> | Vector4): Vector4;
     times(b: number): Vector4;
-
-    add_by(b: Vector<4>): void;
-    add_by(b: Vector4): void;
-    add_by(b: any): void;
-
-    subtract_by(b: Vector<4>): void;
-    subtract_by(b: Vector4): void;
-    subtract_by(b: any): void;
-
-    scale_by(s: Vector<4>): void;
-    scale_by(s: Vector4): void;
-    scale_by(s: any): void;
-
-    scale_pairwise_by(b: Vector<4>): void;
-    scale_pairwise_by(b: Vector4): void;
-    scale_pairwise_by(b: any): void;
-
     randomized(s: number): Vector4;
+    mix(b: Vector<4> | Vector4, s: number): Vector4;
 
-    mix(b: Vector<4>, s: number): Vector4;
-    mix(b: Vector4, s: number): Vector4;
-    mix(b: any, s: number): Vector4;
+    add_by(b: Vector<4> | Vector4): void;
+    subtract_by(b: Vector<4> | Vector4): void;
+    scale_by(s: Vector<4> | Vector4): void;
+    scale_pairwise_by(b: Vector<4> | Vector4): void;
+    normalize(): void;
 
     norm(): number;
     normalized(): Vector4;
-    normalize(): void;
-
-    dot(b: Vector<4>): number;
-    dot(b: Vector4): number;
-    dot(b: any): number;
+    dot(b: Vector<4> | Vector4): number;
 
     static shared_memory: UnsafeVec4;
     static unsafe(x: number, y: number, z: number, w: number): UnsafeVec4;
