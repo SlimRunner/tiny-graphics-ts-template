@@ -13,6 +13,13 @@ Then run
 npm run dev
 ```
 
+Then just run the server whichever way you like. The project official way is
+```sh
+python server.py
+```
+
+You will likely need two terminals since both of those take over. Also, when you make changes it takes a few seconds to update the JS code because of the script to fix references that I explain below.
+
 ## Usage
 
 Make sure that you **import only using relative paths for all files w/o extension** that includes within and outside the `src` directory. The reason for this is that this project does not use a bundler to preserve the directory structure, so it relies on a script to parse the paths and add the `.js` extension. Correct address are resolved simply because `src` and `my_code` both share the same relative position to the root. Hence the "enforced" structure is
