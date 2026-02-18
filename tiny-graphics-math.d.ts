@@ -109,45 +109,173 @@ export namespace math {
     declare readonly rows: R;
     declare readonly cols: C;
 
+    /**
+     * Constructs a R*C matrix. Type system prevents bad matrix
+     * operations.
+     *
+     * NOTE: **this class has partial support for non-square matrices.**
+     * Particularly transposition and multiplication fail silently for
+     * non-square matrices.
+     *
+     * @param args rows of matrix
+     */
     constructor(...args: Tuple<Tuple<number, C>, R>);
+    /**
+     * set matrix by provided values
+     * @param M source matrix or array of arrays
+     */
     set(M: MatrixLike<R, C>): void;
+    /**
+     * (mutable) sets matrix to an identity matrix of provided size.
+     *
+     * NOTE: this is a bad design for a function, so the type system
+     * prevents you from using any number other than the size of this
+     * instance. **The size of a matrix should not be mutable.**
+     *
+     * @param n row count
+     * @param m column count
+     */
     set_identity(n: R, m: C): void;
+    /**
+     * (mutable) returns a sub-matrix with the provided boundaries.
+     *
+     * NOTE: the type system cannot compute the new size statically so
+     * you have to provide it yourself.
+     *
+     * @param start 2-tuple of first row and column of sub-matrix
+     * @param end 2-tuple of last row and column of sub-matrix
+     */
     sub_block<R2 extends number, C2 extends number>(
       start: [number, number],
       end: [number, number],
     ): Matrix<R2, C2>;
+    /**
+     * returns a deep copy of this matrix
+     */
     copy(): Matrix<R, C>;
+    /**
+     * returns true if there is member-wise matrix equality
+     * @param b rhs of operation
+     */
     equals(b: MatrixLike<R, C>): boolean;
+    /**
+     * returns the result of `this + rhs`
+     * @param b rhs of operation
+     */
     plus(b: MatrixLike<R, C>): Matrix<R, C>;
+    /**
+     * returns the result of `this - rhs`
+     * @param b rhs of operation
+     */
     minus(b: MatrixLike<R, C>): Matrix<R, C>;
+    /**
+     * returns the transposition of this matrix
+     */
     transposed(): Matrix<C, R>;
-    times(b: number, pre_alloc?: MatrixLike<R, C>): Matrix<R, C>;
+    /**
+     * returns the result of `this * scalar`
+     * @param s rhs of operation
+     * @param pre_alloc optional result of this multiplication (?!)
+     */
+    times(s: number, pre_alloc?: MatrixLike<R, C>): Matrix<R, C>;
+    /**
+     * returns the result of `this * vector`
+     * @param v rhs of operation
+     * @param pre_alloc optional result of this multiplication (?!)
+     */
     times(v: Vector4, pre_alloc?: MatrixLike<R, 4>): Matrix<R, 1>;
-    times<C2 extends number>( // R x C  *  C x C2  =  R x C2
+    /**
+     * returns the result of `this * matrix`
+     * @param b rhs of operation
+     * @param pre_alloc optional result of this multiplication (?!)
+     */
+    times<C2 extends number>(
       b: MatrixLike<C, C2>,
       pre_alloc?: MatrixLike<R, C2>,
     ): Matrix<R, C2>;
-    pre_multiply<R2 extends number>(b: MatrixLike<R2, R>): Matrix<R2, C>; // R2 x R  *  R x C  =  R2 x C
-    post_multiply(b: number): Matrix<R, C>;
+    /**
+     * (mutable) returns the result of `matrix * this`. Allows chaining
+     * @param b rhs of operation
+     */
+    pre_multiply<R2 extends number>(b: MatrixLike<R2, R>): Matrix<R2, C>;
+    /**
+     * (mutable) returns the result of `this * scalar`. Allows chaining
+     * @param s rhs of operation
+     */
+    post_multiply(s: number): Matrix<R, C>;
+    /**
+     * (mutable) returns the result of `this * vector`. Allows chaining
+     * @param v rhs of operation
+     */
     post_multiply<C2 extends number>(v: Vector4): Matrix<R, 1>;
-    post_multiply<C2 extends number>(b: MatrixLike<C, C2>): Matrix<R, C2>; // R x C  *  C x C2  =  R x C2
-    static flatten_2D_to_1D<
-      R2 extends number,
-      C2 extends number,
-    >(M: MatrixLike<R2, C2>): Float32Array;
+    /**
+     * (mutable) returns the result of `this * matrix`. Allows chaining
+     * @param b rhs of operation
+     */
+    post_multiply<C2 extends number>(b: MatrixLike<C, C2>): Matrix<R, C2>;
+    /**
+     * returns a flattened Float32Array
+     * @param M Matrix object
+     */
+    static flatten_2D_to_1D<R2 extends number, C2 extends number>(
+      M: MatrixLike<R2, C2>,
+    ): Float32Array;
+    /**
+     * returns printable format of this matrix
+     */
     to_string(): string;
   }
 
   export class Mat4 extends Matrix<4, 4> {
+    /**
+     * returns an identity matrix
+     */
     static identity(): Mat4;
+    /**
+     * returns a rotation matrix transform defined around a direction
+     * vector
+     * @param angle angle of rotation along axis
+     * @param x x-component of rotation axis
+     * @param y y-component of rotation axis
+     * @param z y-component of rotation axis
+     */
     static rotation(angle: number, x: number, y: number, z: number): Mat4;
+    /**
+     * returns a scaling matrix transform
+     * @param x x-axis scaling amount
+     * @param y y-axis scaling amount
+     * @param z z-axis scaling amount
+     */
     static scale(x: number, y: number, z: number): Mat4;
+    /**
+     * returns a translation matrix transform
+     * @param x x-axis shift amount
+     * @param y y-axis shift amount
+     * @param z z-axis shift amount
+     */
     static translation(x: number, y: number, z: number): Mat4;
+    /**
+     * returns a rotation matrix that adjust object to look at a
+     * specific location with a given up direction. Useful to define
+     * cameras or flying objects
+     * @param eye desired location of the object
+     * @param at location at which the object "points at"
+     * @param up designed "up" axis (tiny-graphics is y-up)
+     */
     static look_at(
       eye: Vector3 | Vector<3>,
       at: Vector3 | Vector<3>,
       up: Vector3 | Vector<3>,
     ): Mat4;
+    /**
+     * returns an orthographic projection matrix
+     * @param left left boundary of projection
+     * @param right right boundary of projection
+     * @param bottom bottom boundary of projection
+     * @param top top boundary of projection
+     * @param near clip distance of nearest object
+     * @param far clip distance of farthest object
+     */
     static orthographic(
       left: number,
       right: number,
@@ -156,12 +284,23 @@ export namespace math {
       near: number,
       far: number,
     ): Mat4;
+    /**
+     * returns a conic projection matrix
+     * @param fov_y angle of aperture of projection in radians
+     * @param aspect aspect ration relative to height
+     * @param near clip distance of nearest object
+     * @param far clip distance of farthest object
+     */
     static perspective(
       fov_y: number,
       aspect: number,
       near: number,
       far: number,
     ): Mat4;
+    /**
+     * returns the inverse of the given matrix
+     * @param m input matrix to invert
+     */
     static inverse(m: MatrixLike<4, 4>): Mat4;
   }
 
