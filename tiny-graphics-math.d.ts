@@ -133,8 +133,7 @@ export namespace math {
     static flatten_2D_to_1D<
       R2 extends number,
       C2 extends number,
-      F extends number,
-    >(M: MatrixLike<R2, C2>): Tuple<ArrayBuffer, F>;
+    >(M: MatrixLike<R2, C2>): Float32Array;
     to_string(): string;
   }
 
