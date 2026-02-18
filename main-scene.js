@@ -40,6 +40,7 @@ Object.assign(
   { Scene_To_Texture_Demo },
   { Text_Demo },
   { Transforms_Sandbox_Base, Transforms_Sandbox },
+  { Demo },
 );
 
 // ******************** SELECT THE DEMO TO DISPLAY:
