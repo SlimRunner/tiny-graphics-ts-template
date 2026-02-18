@@ -117,7 +117,7 @@ export namespace math {
       end: [number, number],
     ): Matrix<R2, C2>;
     copy(): Matrix<R, C>;
-    equals(b: MatrixLike<R, C>): Matrix<R, C>;
+    equals(b: MatrixLike<R, C>): boolean;
     plus(b: MatrixLike<R, C>): Matrix<R, C>;
     minus(b: MatrixLike<R, C>): Matrix<R, C>;
     transposed(): Matrix<C, R>;
