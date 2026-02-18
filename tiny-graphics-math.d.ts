@@ -111,7 +111,7 @@ export namespace math {
 
     constructor(...args: Tuple<Tuple<number, C>, R>);
     set(M: MatrixLike<R, C>): void;
-    set_identity(n: R, m: C): Matrix<R, C>;
+    set_identity(n: R, m: C): void;
     sub_block<R2 extends number, C2 extends number>(
       start: [number, number],
       end: [number, number],
