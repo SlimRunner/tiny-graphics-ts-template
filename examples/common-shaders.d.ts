@@ -1,9 +1,4 @@
-import {
-  GPUAddresses,
-  MaterialRecord,
-  tiny,
-  Uniforms,
-} from "../tiny-graphics";
+import { GPUAddresses, MaterialRecord, tiny, Uniforms } from "../tiny-graphics";
 import { math } from "../tiny-graphics-math";
 
 export interface LightSource {
@@ -46,9 +41,6 @@ export namespace defs {
       uniforms: Uniforms,
       model_transform: math.Mat4,
     ): void;
-  }
-
-  export class Textured_Phong extends Phong_Shader {
     update_GPU(
       context: WebGL2RenderingContext,
       gpu_addresses: GPUAddresses,
@@ -57,6 +49,8 @@ export namespace defs {
       material: FlatPhongMaterial,
     ): void;
   }
+
+  export class Textured_Phong extends Phong_Shader {}
 
   export class Fake_Bump_Map extends Textured_Phong {}
 }
